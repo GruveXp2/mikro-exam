@@ -1,3 +1,5 @@
+# mikro-exam
+Exam for mbed os exam
 ![](./resources/official_armmbed_example_badge.png)
 # Blinky Mbed OS example
 
