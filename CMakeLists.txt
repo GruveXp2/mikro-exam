@@ -18,6 +18,9 @@ add_executable(${APP_TARGET})
 target_sources(${APP_TARGET}
     PRIVATE
         main.cpp
+        View.h
+        ClimateView.h
+        ClimateView.cpp
 )
 
 target_link_libraries(${APP_TARGET}
