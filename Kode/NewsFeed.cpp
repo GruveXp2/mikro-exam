@@ -1,5 +1,6 @@
 #include "Menu.h"
 #include "NewsFeed.h"
+#include "Network.h"
 
 NewsFeed::NewsFeed(Menu* menu, int& buttonFlags, NetworkInterface* network)
     : View(menu, buttonFlags), network(network), lastUpdate(0) {
@@ -61,47 +62,26 @@ void NewsFeed::draw(DFRobot_RGBLCD1602* lcd) {
 }
 
 void NewsFeed::update() {
-    TLSSocket socket;
-    if (socket.open(network) != NSAPI_ERROR_OK) {
-        printf("TLS socket open failed\n");
-        return;
-    }
+    TLSSocket* socket = new TLSSocket();
+    std::string newsHost = "feeds.bbci.co.uk";
+    std::string newsPath = "/news/world/rss.xml";
+    if ( // connect to them, if it fails just return
+        !Network::openSocket(socket, network) ||
+        !Network::setCert(socket, SSL_CA_PEM2) ||
+        !Network::connectToHost(socket, network, newsHost.c_str(), 443)
+        ) return;
 
-    if (socket.set_root_ca_cert(SSL_CA_PEM2) != NSAPI_ERROR_OK) {
-        printf("Setting root CA cert failed\n");
-        socket.close();
-        return;
-    }
-
-    socket.set_hostname("feeds.bbci.co.uk");
-    SocketAddress address;
-    if (network->gethostbyname("feeds.bbci.co.uk", &address) != NSAPI_ERROR_OK) {
-        printf("DNS lookup failed\n");
-        socket.close();
-        return;
-    }
-    address.set_port(443);
-
-    if (socket.connect(address) != NSAPI_ERROR_OK) {
-        printf("TLS socket connect failed\n");
-        socket.close();
-        return;
-    }
-
-    const char httpRequest[] = "GET /news/world/rss.xml HTTP/1.1\r\n"
-                                "Host: feeds.bbci.co.uk\r\n"
-                                "Connection: close\r\n"
-                                "\r\n";
+    std::string httpRequest = Network::createHTTPReq(newsHost, newsPath);
 
 
-    nsapi_size_t bytesToSend = strlen(httpRequest);
+    size_t bytesToSend = httpRequest.length();
     nsapi_size_or_error_t sentBytes = 0;
 
-    printf("\nSending HTTP request: \n%s", httpRequest);
+    printf("\nHTTP GET: %s%s\n", newsHost.c_str(), newsPath.c_str());
 
     while (bytesToSend) {
         printf("Sending................... ");fflush(stdout);
-        sentBytes = socket.send(httpRequest + sentBytes, bytesToSend);
+        sentBytes = socket->send(httpRequest.c_str() + sentBytes, bytesToSend);
 
         if (sentBytes < 0) {
             // Negative return values from send() are errors
@@ -126,7 +106,7 @@ void NewsFeed::update() {
     headlines.clear();
 
     while (true) {
-        int r = socket.recv(buffer, BUFFER_SIZE);
+        int r = socket->recv(buffer, BUFFER_SIZE);
         if (r <= 0 || titleCount >= 3) break;
 
         xmlChunk.append(buffer, r);
@@ -169,7 +149,8 @@ void NewsFeed::update() {
             if (titleCount >= 3) break;
         }
     }
-    socket.close();
+    socket->close();
+    delete socket;
 }
 
 
