@@ -10,12 +10,11 @@ ClimateView::ClimateView(Menu* menu, int& buttonFlags)
 }
 
 void ClimateView::draw(DFRobot_RGBLCD1602* lcd) {
-    printf("\nClimateView::draw()\n==========\n");
-
 
     sensor.get_temperature(&temperature);
     sensor.get_humidity(&humidity);
 
+    lcd->clear();
     lcd->setCursor(0, 0);
     lcd->printf("Temp: %.1f", temperature);
     //printf("\nTemp: %.1f\n", temperature);

@@ -13,7 +13,6 @@ public:
     void draw(DFRobot_RGBLCD1602* lcd) override;
 
 private:
-    int subView = 0;
     time_t lastUpdate = 0;
 };
 

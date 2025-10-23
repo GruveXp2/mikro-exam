@@ -2,17 +2,10 @@
 #include "Menu.h"
 #include <cstdio>
 
-// subwievs
-#define MAIN 0
-#define SET_ALARM 1
-#define SET_HOUR 2
-#define SET_MINUTES 3
-
 TimeView::TimeView(Menu* menu, int& buttonFlags)
-    : View(menu, buttonFlags), lastUpdate(0)  {}
+    : View(menu, buttonFlags), lastUpdate(0) {}
 
 void TimeView::draw(DFRobot_RGBLCD1602* lcd) {
-    printf("\n\nTimeView::draw\n==========\n");
     lcd->clear();
     time_t seconds = time(NULL);
     if (seconds != lastUpdate){

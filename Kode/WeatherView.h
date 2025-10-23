@@ -1,4 +1,3 @@
-
 #include "DFRobot_RGBLCD1602.h"
 #include "View.h"
 #include <cstdio>
@@ -12,7 +11,6 @@ using json = nlohmann::json;
 
 class WeatherView final : public View {
 public:
-    static const char* SSL_CA_PEM1;
     explicit WeatherView(Menu* menu, int& buttonFlags, NetworkInterface* network, const std::string& longitude, const std::string& latitude);
     virtual ~WeatherView() = default;
 
