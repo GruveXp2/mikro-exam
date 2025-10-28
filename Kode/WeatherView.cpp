@@ -1,6 +1,7 @@
 #include "WeatherView.h"
 #include "Menu.h"
 #include <cstdio>
+#include "Network.h"
 #include <ctime>
 
 WeatherView::WeatherView(Menu* menu, int& buttonFlags, NetworkInterface* network, const std::string& longitude, const std::string& latitude)
@@ -69,48 +70,24 @@ void WeatherView::thread_task(){
 
 
 void WeatherView::update() {
-    TLSSocket socket;
-    if (socket.open(network) != NSAPI_ERROR_OK) {
-        printf("TLS socket open failed\n");
-        return;
-    }
-
-    if (socket.set_root_ca_cert(SSL_CA_PEM1) != NSAPI_ERROR_OK) {
-        printf("Setting root CA cert failed\n");
-        socket.close();
-        return;
-    }
-
-    socket.set_hostname("api.met.no");
-    SocketAddress address;
-    if (network->gethostbyname("api.met.no", &address) != NSAPI_ERROR_OK) {
-        printf("DNS lookup failed\n");
-        socket.close();
-        return;
-    }
-    address.set_port(443);
-
-    if (socket.connect(address) != NSAPI_ERROR_OK) {
-        printf("TLS socket connect failed\n");
-        socket.close();
-        return;
-    }
-
+    TLSSocket* socket = new TLSSocket();
     std::string weatherHost = "api.met.no";
     std::string weatherPath = "/weatherapi/locationforecast/2.0/compact?lat=" + longitude + "&lon=" + latitude;
 
-    std::string httpRequest =
-        "GET " + weatherPath + " HTTP/1.1\r\n" +
-        "Host: " + weatherHost + "\r\n" +
-        "User-Agent: MyWeatherClient/1.0\r\n" +
-        "Connection: close\r\n\r\n";
+    if ( // connect to them, if it fails just return
+        !Network::openSocket(socket, network) ||
+        !Network::setCert(socket, SSL_CA_PEM1) ||
+        !Network::connectToHost(socket, network, weatherHost.c_str(), 443)
+        ) return;
+
+    std::string httpRequest = Network::createHTTPReq(weatherHost, weatherPath);
 
     nsapi_size_t bytesToSend = httpRequest.length();
     nsapi_size_or_error_t sentBytes = 0;
     const char* sendPtr = httpRequest.c_str();
 
     while (bytesToSend) {
-        sentBytes = socket.send(sendPtr, bytesToSend);
+        sentBytes = socket->send(sendPtr, bytesToSend);
         if (sentBytes < 0) {
             break;
         } else {
@@ -132,7 +109,7 @@ void WeatherView::update() {
     size_t End_of_the_array = std::string::npos;
 
     while (true) {
-        int r = socket.recv(buffer, BUFFER_SIZE);
+        int r = socket->recv(buffer, BUFFER_SIZE);
         if (r <= 0) break;
 
         Shorten_Json.append(buffer, r);
@@ -215,7 +192,8 @@ void WeatherView::update() {
             }
         }
     }
-    socket.close();
+    socket->close();
+    delete socket;
 }
 
 
