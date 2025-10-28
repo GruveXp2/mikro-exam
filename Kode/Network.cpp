@@ -61,15 +61,24 @@ bool Network::connectToHost(TLSSocket *socket, NetworkInterface* network, const 
     int hostNameLen = strlen(hostName);
     size_t dots = max(7 - hostNameLen, 2);
     std::string dotStr(dots, '.');
-    printf("Connecting to %s%s", hostName, dotStr.c_str());fflush(stdout);
-    socket->set_hostname(hostName);
+    
     SocketAddress address;
-    int result = network->gethostbyname(hostName, &address);
-    if (result != NSAPI_ERROR_OK) {
-        printf("DNS lookup failed (%d)\n", result);
-        socket->close();
-        return false;
+    int result;
+    int tries = 0;
+    while (1) {
+        tries++;
+        socket->set_hostname(hostName);
+        printf("Connecting to %s%s", hostName, dotStr.c_str());fflush(stdout);
+        result = network->gethostbyname(hostName, &address);
+        if (result != NSAPI_ERROR_OK) {
+            printf("\rConnecting to %s%s dns failed (%d)", hostName, dotStr.c_str(), tries);fflush(stdout);
+            continue;
+        }
+        break;
     }
+    printf("\rConnecting to %s%sSuccess (%d)     \n", hostName, dotStr.c_str(), tries);
+
+
     printf("Success\n");
 
     address.set_port(443);
@@ -77,6 +86,7 @@ bool Network::connectToHost(TLSSocket *socket, NetworkInterface* network, const 
     if (result != NSAPI_ERROR_OK) {
         printf("failed (%d)\n", result);
         socket->close();
+        delete socket;
         return false;
     }
     printf("Success\n");
