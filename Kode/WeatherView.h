@@ -1,3 +1,6 @@
+#ifndef WEATHERVIEW_H
+#define WEATHERVIEW_H
+
 #include "DFRobot_RGBLCD1602.h"
 #include "View.h"
 #include <cstdio>
@@ -5,8 +8,6 @@
 #include <string>
 using json = nlohmann::json;
 
-#ifndef WEATHERVIEW_H
-#define WEATHERVIEW_H
 #define BUFFER_SIZE 520
 
 class WeatherView final : public View {
@@ -16,12 +17,12 @@ public:
 
     void checkButtons() override;
     void draw(DFRobot_RGBLCD1602* lcd) override;
-    void update();
+    
 
-private:
-    Thread updater;
-    bool updating = false;
-    int subView = 0;
+private:    
+    void update();
+    void thread_task();
+    Thread update_thread; 
     time_t lastUpdate = 0;
     NetworkInterface* network;
 
@@ -31,7 +32,7 @@ private:
     std::string construct_url();
 
     float temp = 0.0;
-    std::string lastCondition = "WeatherView";
+    std::string lastCondition = "Hello World!";
 };
 
 #endif //WEATHERVIEW_H

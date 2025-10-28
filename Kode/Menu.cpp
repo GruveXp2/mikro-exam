@@ -21,11 +21,13 @@ void Menu::draw() {
 }
 
 void Menu::nextView() {
+    lcd->clear();
     currentViewIndex++;
     if (currentViewIndex >= views.size()) currentViewIndex = 0;
 }
 
 void Menu::prevView() {
+    lcd->clear();
     currentViewIndex--;
     if (currentViewIndex < 0) currentViewIndex = views.size() - 1;
 }

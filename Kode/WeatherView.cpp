@@ -1,9 +1,11 @@
 #include "WeatherView.h"
 #include "Menu.h"
+#include <cstdio>
 #include <ctime>
 
 WeatherView::WeatherView(Menu* menu, int& buttonFlags, NetworkInterface* network, const std::string& longitude, const std::string& latitude)
     : View(menu, buttonFlags), network(network), lastUpdate(0), longitude(longitude), latitude(latitude), temp(0.0), lastCondition("unknown") {
+        update_thread.start(callback(this, &WeatherView::thread_task));
     }
 
 const char* SSL_CA_PEM1 =   
@@ -49,19 +51,22 @@ const char* SSL_CA_PEM1 =
 
 
 void WeatherView::draw(DFRobot_RGBLCD1602* lcd) {
-    
-    time_t seconds = time(NULL);
-    if (seconds - lastUpdate >= 900){
-        lastUpdate = seconds;
-        update();  
-    }
-    lcd->clear();
     lcd->setCursor(0, 0);
     lcd->printf("%s", lastCondition.c_str());
 
     lcd->setCursor(0, 1);
     lcd->printf("%.f degrees",temp);
 }
+
+void WeatherView::thread_task(){
+    while(1){
+        printf("Fetching weather api\n");
+        fflush(stdout);
+        update();
+        ThisThread::sleep_for(30s);
+    }
+}
+
 
 void WeatherView::update() {
     TLSSocket socket;

@@ -14,6 +14,7 @@ using json = nlohmann::json;
 #define BUFFER_SIZE 4000
 #define REFRESH_RATE 50ms
 
+
 std::string latitude = "";
 std::string longitude = "";
 
@@ -316,6 +317,7 @@ int main() {
 
     // Define the menus and display the first view
     Menu menu(lcd, buttonFlags, network, latitude, longitude);
+    
 
     int updates = 0; 
     while (true) {
