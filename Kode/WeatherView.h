@@ -20,9 +20,7 @@ public:
 
 private:
     Thread updater;
-    bool updating = false;
     int subView = 0;
-    time_t lastUpdate = 0;
     NetworkInterface* network;
 
     std::string latitude;
@@ -31,7 +29,7 @@ private:
     std::string construct_url();
 
     float temp = 0.0;
-    std::string lastCondition = "WeatherView";
+    std::string lastCondition = "loading...";
 };
 
 #endif //WEATHERVIEW_H
