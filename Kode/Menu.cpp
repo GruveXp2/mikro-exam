@@ -6,14 +6,16 @@
 #include "TimeView.h"
 #include "WeatherView.h"
 #include "NewsFeed.h"
+#include "SetLocationView.h"
 
 
 Menu::Menu(DFRobot_RGBLCD1602& lcd, int& buttonFlags, NetworkInterface* network, const std::string& longitude, const std::string& latitude):
-        lcd(&lcd) {
+        lcd(&lcd), latitude(latitude), longitude(longitude) {
     views.push_back(std::make_unique<TimeView>(this, buttonFlags));
     views.push_back(std::make_unique<ClimateView>(this, buttonFlags));
     views.push_back(std::make_unique<WeatherView>(this, buttonFlags, network, longitude, latitude));
     views.push_back(std::make_unique<NewsFeed>(this, buttonFlags, network));
+    views.push_back(std::make_unique<SetLocationView>(this, buttonFlags, longitude, latitude));
 }
 
 void Menu::draw() {
@@ -22,12 +24,16 @@ void Menu::draw() {
 
 void Menu::nextView() {
     currentViewIndex++;
-    if (currentViewIndex >= views.size()) currentViewIndex = 0;
+    if (currentViewIndex >= static_cast<int>(ViewType::COUNT)) currentViewIndex = 0;
 }
 
 void Menu::prevView() {
     currentViewIndex--;
-    if (currentViewIndex < 0) currentViewIndex = views.size() - 1;
+    if (currentViewIndex < 0) currentViewIndex = static_cast<int>(ViewType::COUNT) - 1;
+}
+
+void Menu::showView(ViewType view) {
+    currentViewIndex = static_cast<int>(view);
 }
 
 void Menu::checkButtons() {

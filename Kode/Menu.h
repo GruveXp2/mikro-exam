@@ -8,6 +8,7 @@
 
 //class View; // fikser sirkulær include pga Menu og Views må vite om hverandre
 #include "View.h" // 👈 MÅ inkluderes her
+#include "ViewType.h"
 
 class Menu {
     // Holder styr på alle views, og hvilken view som er oppe
@@ -18,11 +19,15 @@ public:
     void draw();
     void nextView();
     void prevView();
+    void showView(ViewType view);
     void checkButtons();
 protected:
     int currentViewIndex = 0;
     std::vector<std::unique_ptr<View>> views;
+
     DFRobot_RGBLCD1602* lcd;
+    std::string longitude;
+    std::string latitude;
 };
 
 #endif //MENU_H
