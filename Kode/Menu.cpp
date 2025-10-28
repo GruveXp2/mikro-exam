@@ -23,11 +23,13 @@ void Menu::draw() {
 }
 
 void Menu::nextView() {
+    lcd->clear();
     currentViewIndex++;
     if (currentViewIndex >= static_cast<int>(ViewType::COUNT)) currentViewIndex = 0;
 }
 
 void Menu::prevView() {
+    lcd->clear();
     currentViewIndex--;
     if (currentViewIndex < 0) currentViewIndex = static_cast<int>(ViewType::COUNT) - 1;
 }

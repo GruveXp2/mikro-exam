@@ -45,8 +45,8 @@ void NewsFeed::draw(DFRobot_RGBLCD1602* lcd) {
     if (!headlines.empty()) {
         std::string text = headlines[headlineIndex];
 
-        // pad with spaces for smooth scrolling
-        text += "                ";  // 16 spaces
+        // Adds spaces between the headlines
+        text += "                ";  
 
         std::string window = text.substr(scrollingIndex, lcdWidth);
 
