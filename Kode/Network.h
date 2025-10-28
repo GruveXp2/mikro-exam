@@ -6,6 +6,8 @@
 
 class Network {
 public:
+    static bool connectToWifi(NetworkInterface* network);
+    static NetworkInterface* getNetworkInterFace();
     static bool openSocket(TLSSocket* socket, NetworkInterface* network);
     static bool setCert(TLSSocket* socket, const char* cert);
     static bool connectToHost(TLSSocket* socket, NetworkInterface* network, const char* hostName, uint16_t port);

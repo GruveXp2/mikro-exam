@@ -7,8 +7,8 @@
 #include "DFRobot_RGBLCD1602.h"
 using json = nlohmann::json;
 
-
 #include "Menu.h"
+#include "Network.h"
 
 #define TRACE_GROUP "main"
 #define BUFFER_SIZE 4000
@@ -86,88 +86,41 @@ int main() {
     lcd.setCursor(0, 0);
     lcd.printf("Connect ---------");
 
-    printf("Getting default instance... ");fflush(stdout);
-    NetworkInterface *network = NetworkInterface::get_default_instance();
-    if (!network) {
-        printf("Failed to get default network interface\n");
-        while (1);
-    }
-    printf("Success\n");
+    NetworkInterface* network = Network::getNetworkInterFace();
     lcd.setCursor(0, 0);
     lcd.printf("Connect #-------");
 
-
-    printf("Connecting to network...... ");fflush(stdout);
-    int tries = 0;
-    while (1) {
-        tries++;
-        nsapi_size_or_error_t result = network->connect();
-        if (result == -3011) {
-            printf("\rConnecting to network...... failed (%d)", tries);fflush(stdout);
-            continue;
-        }
-        if (result != 0) {
-            printf("Failed to connect to network: %d\n", result);
-            while (1);
-        }
-        break;
-    }
-    printf("\rConnecting to network...... Success (%d)\n", tries);
+    Network::connectToWifi(network);
     lcd.setCursor(0, 0);
     lcd.printf("Connect ##------");
 
-    nsapi_error_t r;
-
-    printf("Opening tls socket......... ");fflush(stdout);
-    // setting up TLS socket
     TLSSocket* socket = new TLSSocket();
-    if ((r = socket->open(network)) != NSAPI_ERROR_OK) {
-        printf("TLS socket open failed (%d)\n", r);
-        return 1;
-    }
-    printf("Success\n");
+    Network::openSocket(socket, network);
     lcd.setCursor(0, 0);
     lcd.printf("Connect ###-----");
 
-    printf("Setting certificate........ ");fflush(stdout);
-    if ((r = socket->set_root_ca_cert(SSL_CA_PEM)) != NSAPI_ERROR_OK) {
-        printf("TLS socket setRoot_ca_cert failed (%d)\n", r);
-        return 1;
-    }
-    printf("Success\n");
+    Network::setCert(socket, SSL_CA_PEM);
     lcd.setCursor(0, 0);
     lcd.printf("Connect ####----");
+    
+    std::string ipGeoHost = "api.ipgeolocation.io";
+    std::string ipGeoPath = "/v2/timezone?apiKey=b0c2c1c553244be58e7bf18736e8106e";
 
     socket->set_hostname("api.ipgeolocation.io");
 
-    SocketAddress address;
-    network->gethostbyname("api.ipgeolocation.io", &address);
-    address.set_port(443);
-
-    printf("Connecting to ip_geolocation...... ");fflush(stdout);
-    if ((r = socket->connect(address)) != NSAPI_ERROR_OK) {
-        printf("TLS socket connect failed (%d) Bruh\n", r);
-        socket->close();
-        return 1;
-    }
-    printf("Success\n");
+    Network::connectToHost(socket, network, ipGeoHost.c_str(), 443);
     lcd.setCursor(0, 0);
     lcd.printf("Connect #####---");
 
-    const char httpRequest[] = "GET /v2/timezone?apiKey=b0c2c1c553244be58e7bf18736e8106e HTTP/1.1\r\n"
-                                "Host: api.ipgeolocation.io\r\n"
-                                "Connection: close\r\n"
-                                "\r\n";
+    std::string httpRequest = Network::createHTTPReq(ipGeoHost, ipGeoPath);
 
 
-    nsapi_size_t bytesToSend = strlen(httpRequest);
+    nsapi_size_t bytesToSend = httpRequest.length();
     nsapi_size_or_error_t sentBytes = 0;
-
-    printf("\nSending HTTP request: \n%s", httpRequest);
 
     while (bytesToSend) {
         printf("Sendeing................... ");fflush(stdout);
-        sentBytes = socket->send(httpRequest + sentBytes, bytesToSend);
+        sentBytes = socket->send(httpRequest.c_str() + sentBytes, bytesToSend);
 
         if (sentBytes < 0) {
             // Negative return values from send() are errors
