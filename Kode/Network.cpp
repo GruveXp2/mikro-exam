@@ -65,10 +65,10 @@ bool Network::connectToHost(TLSSocket *socket, NetworkInterface* network, const 
     SocketAddress address;
     int result;
     int tries = 0;
+    printf("Connecting to %s%s", hostName, dotStr.c_str());fflush(stdout);
     while (1) {
         tries++;
         socket->set_hostname(hostName);
-        printf("Connecting to %s%s", hostName, dotStr.c_str());fflush(stdout);
         result = network->gethostbyname(hostName, &address);
         if (result != NSAPI_ERROR_OK) {
             printf("\rConnecting to %s%s dns failed (%d)", hostName, dotStr.c_str(), tries);fflush(stdout);
