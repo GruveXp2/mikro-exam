@@ -16,7 +16,6 @@ public:
 private:
     time_t lastUpdate = 0;
     AlarmClock& alarmClock;
-
 };
 
 #endif //TIMEVIEW_H

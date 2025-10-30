@@ -1,5 +1,16 @@
 /.mbed
 /mbed_app.json
+.build
+.mbed
+projectfiles
+*.py*
+BUILD
+HTS221
+mbed-os
+wifi-ism43362
+/resources/
+/.idea
+/mbed-os/
 /mbed-os.lib
 /.idea/.gitignore
 /.idea/editor.xml
@@ -7,3 +18,5 @@
 /.idea/modules.xml
 /.idea/vcs.xml
 /BUILD
+/mbed-os.lnk
+/.github/

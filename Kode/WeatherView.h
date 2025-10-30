@@ -17,20 +17,20 @@ public:
 
     void checkButtons() override;
     void draw(DFRobot_RGBLCD1602* lcd) override;
-    
 
 private:    
     NetworkInterface* network;
-    std::string latitude;
+
     std::string longitude;
+    std::string latitude;
 
     std::string construct_url();
 
     float temp = 0.0f;
-    std::string lastCondition = "unknown";
+    std::string lastCondition = "loading...";
 
-    Thread update_thread; 
-    Mutex weather_mutex; 
+    Thread update_thread;
+    Mutex weather_mutex;
 
     void update();
     void thread_task();

@@ -27,7 +27,7 @@ void TimeView::draw(DFRobot_RGBLCD1602* lcd) {
     switch(state){
         case AlarmState::Disabled:
         lcd->printf("                ");
-        break; 
+        break;
 
         case AlarmState::Enabled:
         lcd->printf("Alarm     %02d:%02d", hour, minute); // pad to fill 16 chars
@@ -41,7 +41,7 @@ void TimeView::draw(DFRobot_RGBLCD1602* lcd) {
             lcd->printf("Alarm (S) %02d:%02d", hour, minute);
             break;
     }
-} 
+}
 
 void TimeView::checkButtons() {
     if (isButtonPressed(1)) {

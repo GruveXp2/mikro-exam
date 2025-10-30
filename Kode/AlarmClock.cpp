@@ -2,17 +2,17 @@
 #include "AlarmClock.h"
 #include <ctime>
 
-AlarmClock::AlarmClock () 
-    : hour(0), minute(0), state(AlarmState::Disabled), 
-    snoozeTimer(0), activeTimer(0) {} 
+AlarmClock::AlarmClock ()
+    : hour(0), minute(0), state(AlarmState::Disabled),
+    snoozeTimer(0), activeTimer(0) {}
 
 void AlarmClock::update(time_t currentTime){
     if (state == AlarmState::Disabled) return; 
 
-    struct tm *localtm = localtime(&currentTime); 
+    struct tm *localtm = localtime(&currentTime);
     int currentHour = localtm -> tm_hour;
-    int currentMinute = localtm -> tm_min; 
-    
+    int currentMinute = localtm -> tm_min;
+
     if (state == AlarmState::Enabled) {
         if (currentHour > hour || (currentHour == hour && currentMinute >= minute)) {
             active();
@@ -40,7 +40,7 @@ void AlarmClock::deactivate(){
 
 void AlarmClock::setTimer(int hour, int minute){
     this -> hour = hour;
-    this -> minute = minute; 
+    this -> minute = minute;
 }
 
 void AlarmClock::enable(bool is_on){
