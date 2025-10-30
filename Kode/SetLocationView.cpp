@@ -2,6 +2,8 @@
 #include "Menu.h"
 #include <string>
 
+#define FLOAT_LENGTH 8 // this is how many symbols that will be shown when u edit the location floats
+
 #define SELECTING_AXIS 0
 #define SELECTING_INDEX 1
 #define SELECTING_SYMBOL 2
@@ -32,12 +34,15 @@ void SetLocationView::draw(DFRobot_RGBLCD1602* lcd) {
             lcd->printf("%s", currentlySetting->c_str());
             lcd->setCursor(0, 1);
             lcd->printf("                ");
-            if (symbolIndex > 0) {
+            if (symbolIndex == 0) {
+                lcd->setCursor(symbolIndex    , 1);
+                lcd->printf("->");
+            } else if (symbolIndex == FLOAT_LENGTH - 1) {
+                lcd->setCursor(symbolIndex - 1, 1);
+                lcd->printf("<-");
+            } else {
                 lcd->setCursor(symbolIndex - 1, 1);
                 lcd->printf("<->");
-            } else {
-                lcd->setCursor(symbolIndex, 1);
-                lcd->printf("->");
             }
             break;
         case SELECTING_SYMBOL:
@@ -69,11 +74,11 @@ void SetLocationView::checkButtons() {
             } else if (isButtonPressed(1)) {
                 symbolIndex --;
                 if (symbolIndex < 0) {
-                    symbolIndex = 15; // lcd is 16 wide
+                    symbolIndex = FLOAT_LENGTH - 1;
                 }
             } else if (isButtonPressed(2)) {
                 symbolIndex ++;
-                if (symbolIndex >= 16) {
+                if (symbolIndex >= FLOAT_LENGTH) {
                     symbolIndex = 0;
                 }
             } else if (isButtonPressed(3)) {
@@ -85,14 +90,14 @@ void SetLocationView::checkButtons() {
                 currentSubView = SELECTING_INDEX;
             } else if (isButtonPressed(1)) {
                 symbolId--;
-                if (symbolIndex < 0) {
-                    symbolIndex = 15; // lcd is 16 wide
+                if (symbolId < 0) {
+                    symbolId = symbols.size() - 1;
                 }
                 (*currentlySetting)[symbolIndex] = symbols[symbolId];
             } else if (isButtonPressed(2)) {
                 symbolId++;
-                if (symbolIndex >= 16) {
-                    symbolIndex = 0;
+                if (symbolId >= symbols.size()) {
+                    symbolId = 0;
                 }
                 (*currentlySetting)[symbolIndex] = symbols[symbolId];
             }

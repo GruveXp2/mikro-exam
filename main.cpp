@@ -219,6 +219,14 @@ int main() {
                 location.contains("longitude") && location["longitude"].is_string()){
                     latitude = location["latitude"];
                     longitude = location["longitude"];
+                    // making sure hte latitude/longitude strings are exactly 8c long as required by SetLocationView
+                    // they will either be 7 or 8 digits based on if the degrees are 1 or 2 digits before the comma
+                    if (latitude.size() < 8) {
+                        latitude = '0' + latitude;
+                    }
+                    if (longitude.size() < 8) {
+                        longitude = '0' + longitude;
+                    }
                     lcd.setCursor(0, 0);
                     lcd.printf("Lat: %s", latitude.c_str());
                     lcd.setCursor(0, 1);
