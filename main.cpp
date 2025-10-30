@@ -83,7 +83,7 @@ int main() {
     serial_port.set_baud(115200);
     lcd.init();
     lcd.clear();
-    lcd.setRGB(0,255,127);
+    lcd.setRGB(127,255,127);
 
     mbed_trace_init();
 

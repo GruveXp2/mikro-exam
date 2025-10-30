@@ -16,6 +16,7 @@ Menu::Menu(DFRobot_RGBLCD1602& lcd, int& buttonFlags, NetworkInterface* network,
     views.push_back(std::make_unique<WeatherView>(this, buttonFlags, network, longitude, latitude));
     views.push_back(std::make_unique<NewsFeed>(this, buttonFlags, network));
     views.push_back(std::make_unique<SetLocationView>(this, buttonFlags, longitude, latitude));
+    lcd.setRGB(0,255,127);
 }
 
 void Menu::draw() {
@@ -38,6 +39,9 @@ void Menu::showView(ViewType view) {
     currentViewIndex = static_cast<int>(view);
     if (currentViewIndex > static_cast<int>(ViewType::COUNT)) {
         currentViewIndex--;
+        lcd->setRGB(255,255,0);
+    } else {
+        lcd->setRGB(0,255,127);
     }
     printf("its now gonna switch to %d\n", currentViewIndex);
 }
