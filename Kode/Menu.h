@@ -19,7 +19,7 @@ public:
 
     void draw();
     void refreshScreen();
-    
+
     void nextView();
     void prevView();
     void showView(ViewType view);

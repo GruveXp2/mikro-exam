@@ -1,6 +1,5 @@
 #include "Menu.h"
 #include "AlarmClock.h"
-#include <algorithm>
 #include <ctime>
 
 AlarmClock::AlarmClock ()

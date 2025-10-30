@@ -24,7 +24,7 @@ public:
     int get_hour() const; 
     int get_minute() const;
     void set_alarm(int hour, int minute);
-    
+
 private:
     AlarmState state;
 
