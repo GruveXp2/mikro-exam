@@ -10,7 +10,6 @@ enum class AlarmState{
     Active,
     Snooze
 };
-// this comment literally does nothing
 class AlarmClock {
 public:
     AlarmClock();
@@ -24,7 +23,8 @@ public:
     AlarmState get_AlarmClock_State() const; 
     int get_hour() const; 
     int get_minute() const;
-    
+    void set_alarm(int hour, int minute);
+
 private:
     AlarmState state;
 

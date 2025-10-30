@@ -64,3 +64,8 @@ AlarmState AlarmClock::get_AlarmClock_State() const {return state;}
 int AlarmClock::get_hour() const {return hour;}
 int AlarmClock::get_minute() const {return minute;}
 
+void AlarmClock::set_alarm(int hour, int minute) {
+    this->hour = hour;
+    this->minute = minute;
+}
+

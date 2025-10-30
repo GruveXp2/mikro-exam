@@ -48,6 +48,8 @@ void TimeView::checkButtons() {
         menu->prevView();
     } else if (isButtonPressed(2)) {
         menu->nextView();
+    } else if (isButtonPressed(3)) {
+        menu->showView(ViewType::SET_ALARM);
     }
 }
 

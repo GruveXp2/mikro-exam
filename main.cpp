@@ -15,6 +15,7 @@ using json = nlohmann::json;
 #define TRACE_GROUP "main"
 #define BUFFER_SIZE 4000
 #define REFRESH_RATE 50ms
+#define DEBOUNCE_TIME 200ms
 
 
 std::string latitude = "";
@@ -70,7 +71,7 @@ int buttonFlags = 0;
 Timer debounceTimer;
 
 void handleButtonPress(int buttonIndex) {
-    if (debounceTimer.elapsed_time() > 100ms) {
+    if (debounceTimer.elapsed_time() > DEBOUNCE_TIME) {
         buttonFlags |= (1 << buttonIndex);
         debounceTimer.reset();
     }
@@ -82,7 +83,7 @@ int main() {
     serial_port.set_baud(115200);
     lcd.init();
     lcd.clear();
-    lcd.setRGB(0,255,127);
+    lcd.setRGB(127,255,127);
 
     mbed_trace_init();
 
@@ -218,6 +219,14 @@ int main() {
                 location.contains("longitude") && location["longitude"].is_string()){
                     latitude = location["latitude"];
                     longitude = location["longitude"];
+                    // making sure hte latitude/longitude strings are exactly 8c long as required by SetLocationView
+                    // they will either be 7 or 8 digits based on if the degrees are 1 or 2 digits before the comma
+                    if (latitude.size() < 8) {
+                        latitude = '0' + latitude;
+                    }
+                    if (longitude.size() < 8) {
+                        longitude = '0' + longitude;
+                    }
                     lcd.setCursor(0, 0);
                     lcd.printf("Lat: %s", latitude.c_str());
                     lcd.setCursor(0, 1);

@@ -7,6 +7,7 @@
 #include "WeatherView.h"
 #include "NewsFeed.h"
 #include "SetLocationView.h"
+#include "SetAlarmView.h"
 
 
 Menu::Menu(DFRobot_RGBLCD1602& lcd, int& buttonFlags, NetworkInterface* network, std::string& longitude, std::string& latitude):
@@ -16,30 +17,44 @@ Menu::Menu(DFRobot_RGBLCD1602& lcd, int& buttonFlags, NetworkInterface* network,
     views.push_back(std::make_unique<WeatherView>(this, buttonFlags, network, longitude, latitude));
     views.push_back(std::make_unique<NewsFeed>(this, buttonFlags, network));
     views.push_back(std::make_unique<SetLocationView>(this, buttonFlags, longitude, latitude));
+    views.push_back(std::make_unique<SetAlarmView>(this, buttonFlags, alarmClock));
+    lcd.setRGB(0,255,127);
 }
 
 void Menu::draw() {
+    if (refresh) {
+        lcd->clear();
+        refresh = false;
+    }
     views.at(currentViewIndex)->draw(lcd);
 }
 
+void Menu::refreshScreen() {
+    refresh = true;
+}
+
 void Menu::nextView() {
-    lcd->clear();
+    refresh = true;
     currentViewIndex++;
     if (currentViewIndex >= static_cast<int>(ViewType::COUNT)) currentViewIndex = 0;
 }
 
 void Menu::prevView() {
+    refresh = true;
     lcd->clear();
     currentViewIndex--;
     if (currentViewIndex < 0) currentViewIndex = static_cast<int>(ViewType::COUNT) - 1;
 }
 
 void Menu::showView(ViewType view) {
+    refresh = true;
     currentViewIndex = static_cast<int>(view);
     if (currentViewIndex > static_cast<int>(ViewType::COUNT)) {
         currentViewIndex--;
+        lcd->setRGB(255,255,0);
+    } else {
+        lcd->setRGB(0,255,127);
     }
-    printf("its now gonna switch to %d\n", currentViewIndex);
 }
 
 void Menu::checkButtons() {

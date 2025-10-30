@@ -12,11 +12,7 @@ wifi-ism43362
 /.idea
 /mbed-os/
 /mbed-os.lib
-/.idea/.gitignore
-/.idea/editor.xml
-/.idea/Exam.iml
-/.idea/modules.xml
-/.idea/vcs.xml
+/.idea/
 /BUILD
 /mbed-os.lnk
 /.github/

@@ -7,7 +7,8 @@ enum class ViewType {
     WEATHER,
     NEWS,
     COUNT, // this is the count of normal views. this is so that when you do next/prev view, it will only cycle thru the main views, all other must be accessed directly
-    SET_LOCATION
+    SET_LOCATION,
+    SET_ALARM
 };
 
 #endif //VIEWTYPE_H
