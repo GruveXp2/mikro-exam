@@ -66,11 +66,13 @@ void SetLocationView::checkButtons() {
                 currentlySetting = isSettingLongitude ? &longitude : &latitude;
             } else if (isButtonPressed(3)) {
                 currentSubView = SELECTING_INDEX;
+                menu->refreshScreen();
             }
             break;
         case SELECTING_INDEX:
             if (isButtonPressed(0)) {
                 currentSubView = SELECTING_AXIS;
+                menu->refreshScreen();
             } else if (isButtonPressed(1)) {
                 symbolIndex --;
                 if (symbolIndex < 0) {
@@ -83,11 +85,14 @@ void SetLocationView::checkButtons() {
                 }
             } else if (isButtonPressed(3)) {
                 currentSubView = SELECTING_SYMBOL;
+                char currentSymbol = currentlySetting->at(symbolIndex);
+                symbolId = symbols.find(currentSymbol); // current symbol will be set to the one ur currently looking at instead of the last number or 0
             }
             break;
         case SELECTING_SYMBOL:
             if (isButtonPressed(0) || isButtonPressed(3)) {
                 currentSubView = SELECTING_INDEX;
+                menu->refreshScreen();
             } else if (isButtonPressed(1)) {
                 symbolId--;
                 if (symbolId < 0) {

@@ -20,22 +20,32 @@ Menu::Menu(DFRobot_RGBLCD1602& lcd, int& buttonFlags, NetworkInterface* network,
 }
 
 void Menu::draw() {
+    if (refresh) {
+        lcd->clear();
+        refresh = false;
+    }
     views.at(currentViewIndex)->draw(lcd);
 }
 
+void Menu::refreshScreen() {
+    refresh = true;
+}
+
 void Menu::nextView() {
-    lcd->clear();
+    refresh = true;
     currentViewIndex++;
     if (currentViewIndex >= static_cast<int>(ViewType::COUNT)) currentViewIndex = 0;
 }
 
 void Menu::prevView() {
+    refresh = true;
     lcd->clear();
     currentViewIndex--;
     if (currentViewIndex < 0) currentViewIndex = static_cast<int>(ViewType::COUNT) - 1;
 }
 
 void Menu::showView(ViewType view) {
+    refresh = true;
     currentViewIndex = static_cast<int>(view);
     if (currentViewIndex > static_cast<int>(ViewType::COUNT)) {
         currentViewIndex--;
@@ -43,7 +53,6 @@ void Menu::showView(ViewType view) {
     } else {
         lcd->setRGB(0,255,127);
     }
-    printf("its now gonna switch to %d\n", currentViewIndex);
 }
 
 void Menu::checkButtons() {

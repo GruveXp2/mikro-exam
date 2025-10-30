@@ -21,11 +21,13 @@ public:
     void nextView();
     void prevView();
     void showView(ViewType view);
+    void refreshScreen();
     void checkButtons();
     AlarmClock& getAlarmClock() {return alarmClock;}
 protected:
     int currentViewIndex = 0;
     std::vector<std::unique_ptr<View>> views;
+    bool refresh = false;
 
     DFRobot_RGBLCD1602* lcd;
     AlarmClock alarmClock;
