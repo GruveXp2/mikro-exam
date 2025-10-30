@@ -15,6 +15,7 @@ using json = nlohmann::json;
 #define TRACE_GROUP "main"
 #define BUFFER_SIZE 4000
 #define REFRESH_RATE 50ms
+#define DEBOUNCE_TIME 200ms
 
 
 std::string latitude = "";
@@ -70,7 +71,7 @@ int buttonFlags = 0;
 Timer debounceTimer;
 
 void handleButtonPress(int buttonIndex) {
-    if (debounceTimer.elapsed_time() > 100ms) {
+    if (debounceTimer.elapsed_time() > DEBOUNCE_TIME) {
         buttonFlags |= (1 << buttonIndex);
         debounceTimer.reset();
     }
