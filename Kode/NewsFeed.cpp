@@ -163,7 +163,5 @@ void NewsFeed::checkButtons() {
         menu->prevView();
     } else if (isButtonPressed(2)) {
         menu->nextView();
-    } else if (isButtonPressed(3)) {
-        update();
     }
 }
