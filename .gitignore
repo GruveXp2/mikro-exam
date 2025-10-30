@@ -10,3 +10,6 @@ wifi-ism43362
 /.idea
 /mbed-os/
 /resources/
+/mbed-os.lib
+/mbed-os.lnk
+/mbed_app.json
