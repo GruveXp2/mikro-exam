@@ -7,11 +7,6 @@ HTS221
 mbed-os
 wifi-ism43362
 /resources/
-/.idea/.gitignore
-/.idea/assigmnent_exam.iml
-/.idea/editor.xml
-/.idea/misc.xml
-/.idea/modules.xml
-/.idea/vcs.xml
-/.idea/assigmnent_exam2.iml
-/.idea/eksamen.iml
+/.idea
+/mbed-os/
+/resources/
