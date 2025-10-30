@@ -9,7 +9,7 @@
 #include "SetLocationView.h"
 
 
-Menu::Menu(DFRobot_RGBLCD1602& lcd, int& buttonFlags, NetworkInterface* network, const std::string& longitude, const std::string& latitude):
+Menu::Menu(DFRobot_RGBLCD1602& lcd, int& buttonFlags, NetworkInterface* network, std::string& longitude, std::string& latitude):
         lcd(&lcd), latitude(latitude), longitude(longitude) {
     views.push_back(std::make_unique<TimeView>(this, buttonFlags));
     views.push_back(std::make_unique<ClimateView>(this, buttonFlags));
@@ -20,6 +20,7 @@ Menu::Menu(DFRobot_RGBLCD1602& lcd, int& buttonFlags, NetworkInterface* network,
 
 void Menu::draw() {
     views.at(currentViewIndex)->draw(lcd);
+    //printf("its now gonna show view number %d\n", currentViewIndex);
 }
 
 void Menu::nextView() {
@@ -36,6 +37,10 @@ void Menu::prevView() {
 
 void Menu::showView(ViewType view) {
     currentViewIndex = static_cast<int>(view);
+    if (currentViewIndex > static_cast<int>(ViewType::COUNT)) {
+        currentViewIndex--;
+    }
+    printf("its now gonna switch to %d\n", currentViewIndex);
 }
 
 void Menu::checkButtons() {

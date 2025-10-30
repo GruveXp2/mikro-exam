@@ -1,4 +1,5 @@
 #include "WeatherView.h"
+#include "ViewType.h"
 #include "Menu.h"
 #include <cstdio>
 #include "Network.h"
@@ -203,6 +204,6 @@ void WeatherView::checkButtons() {
     } else if (isButtonPressed(2)) {
         menu->nextView();
     } else if (isButtonPressed(3)) {
-        update();
+        menu->showView(ViewType::SET_LOCATION);
     }
 }

@@ -26,8 +26,8 @@ private:
     time_t lastUpdate = 0;
     NetworkInterface* network;
 
-    std::string latitude;
     std::string longitude;
+    std::string latitude;
 
     std::string construct_url();
 

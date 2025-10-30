@@ -13,7 +13,7 @@
 class Menu {
     // Holder styr på alle views, og hvilken view som er oppe
 public:
-    Menu(DFRobot_RGBLCD1602& lcd, int& buttonFlags, NetworkInterface* netowork, const std::string& longitude, const std::string& latitude);
+    Menu(DFRobot_RGBLCD1602& lcd, int& buttonFlags, NetworkInterface* netowork, std::string& longitude, std::string& latitude);
     virtual ~Menu() = default;
 
     void draw();
@@ -26,8 +26,8 @@ protected:
     std::vector<std::unique_ptr<View>> views;
 
     DFRobot_RGBLCD1602* lcd;
-    std::string longitude;
-    std::string latitude;
+    std::string& longitude;
+    std::string& latitude;
 };
 
 #endif //MENU_H
