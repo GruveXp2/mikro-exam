@@ -3,10 +3,10 @@
 #include <cstdio>
 
 ClimateView::ClimateView(Menu* menu, int& buttonFlags)
-    : View(menu, buttonFlags), i2c(PB_11, PB_10), sensor(&i2c)  {
-        sensor.init(nullptr);
-        sensor.enable();
-        printf("sensor was inited\n");
+        : View(menu, buttonFlags), i2c(PB_11, PB_10), sensor(&i2c)  {
+    sensor.init(nullptr);
+    sensor.enable();
+    printf("sensor was inited\n");
 }
 
 void ClimateView::draw(DFRobot_RGBLCD1602* lcd) {
