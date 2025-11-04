@@ -26,8 +26,10 @@ public:
     int get_minute() const;
     void set_alarm(int hour, int minute);
     void start();
+    void init();
 
 private:
+    bool isBuzzerInited = false;
     AlarmState state;
     PwmOut buzzer;
 
