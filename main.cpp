@@ -289,6 +289,9 @@ int main() {
         if (buttonFlags > 0) {
             menu.checkButtons();
         }
+
+        menu.getAlarmClock().update();
+
         updates++;
         if (updates % 5 == 0 || buttonFlags > 0) { // lsden drawer sjeldnere for å spare strøm (med mindre en knapp blir trykt)
             menu.draw();

@@ -4,28 +4,34 @@
 
 AlarmClock::AlarmClock ()
     : hour(0), minute(0), state(AlarmState::Disabled),
-    snoozeTimer(0), activeTimer(0) {}
+    snoozeTimer(0), activeTimer(0) {
+    }
 
-void AlarmClock::update(time_t currentTime){
+
+void AlarmClock::update(){
     if (state == AlarmState::Disabled) return; 
 
+    time_t currentTime = time(NULL);
     struct tm *localtm = localtime(&currentTime);
     int currentHour = localtm -> tm_hour;
     int currentMinute = localtm -> tm_min;
 
     if (state == AlarmState::Enabled) {
-        if (currentHour > hour || (currentHour == hour && currentMinute >= minute)) {
+        if (currentHour == hour && currentMinute == minute) {
             active();
         }
-        return;
     }
 
-    if(state == AlarmState::Active && currentTime - activeTimer >= AUTO_MUTE_TIMER){
-        state = AlarmState::Enabled;
+    if(state == AlarmState::Active){
+        if (currentTime - activeTimer >= AUTO_MUTE_TIMER){
+            state = AlarmState::Enabled;
+        }
     }
 
-    if (state == AlarmState::Snooze && currentTime >= snoozeTimer){
-        active();
+    if (state == AlarmState::Snooze) {
+        if (currentTime >= snoozeTimer){
+            active();   
+        }
     }
 }
 
@@ -41,6 +47,7 @@ void AlarmClock::deactivate(){
 void AlarmClock::setTimer(int hour, int minute){
     this -> hour = hour;
     this -> minute = minute;
+    state = AlarmState::Enabled;
 }
 
 void AlarmClock::enable(bool is_on){
@@ -64,8 +71,5 @@ AlarmState AlarmClock::get_AlarmClock_State() const {return state;}
 int AlarmClock::get_hour() const {return hour;}
 int AlarmClock::get_minute() const {return minute;}
 
-void AlarmClock::set_alarm(int hour, int minute) {
-    this->hour = hour;
-    this->minute = minute;
-}
+
 

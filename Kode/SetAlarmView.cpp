@@ -12,7 +12,7 @@ SetAlarmView::SetAlarmView(Menu* menu, int& buttonFlags, AlarmClock& alarmClock)
 
 void SetAlarmView::draw(DFRobot_RGBLCD1602* lcd) {
     lcd->setCursor(0, 0);
-    lcd->printf("setting  %05d:%05d", hour, minute);
+    lcd->printf("setting  %02d:%02d", hour, minute);
 
     if (isSelectingDigit) {
         lcd->setCursor(0, 1);
@@ -24,7 +24,7 @@ void SetAlarmView::draw(DFRobot_RGBLCD1602* lcd) {
             lcd->setCursor(12, 1);
             lcd->printf("<-");
         } else {
-            lcd->setCursor(8 + currentDigit * 2, 1);
+            lcd->setCursor(7 + currentDigit * 2, 1);
             lcd->printf("<->");
         }
     } else {
@@ -40,7 +40,7 @@ void SetAlarmView::draw(DFRobot_RGBLCD1602* lcd) {
 void SetAlarmView::checkButtons() {
     if (isSelectingDigit) {
         if (isButtonPressed(0)) {
-            alarmClock.set_alarm(hour, minute);
+            alarmClock.setTimer(hour, minute);
             menu->showView(ViewType::TIME);
         } else if (isButtonPressed(1)) {
             currentDigit --;

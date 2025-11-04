@@ -6,7 +6,7 @@
 #include <ctime>
 
 WeatherView::WeatherView(Menu* menu, int& buttonFlags, NetworkInterface* network, const std::string& longitude, const std::string& latitude)
-    : View(menu, buttonFlags), network(network), longitude(longitude), latitude(latitude), update_thread(osPriorityLow) {
+    : View(menu, buttonFlags), network(network), longitude(longitude), latitude(latitude), update_thread(osPriorityNormal) {
         update_thread.start(callback(this, &WeatherView::thread_task));
     }
 

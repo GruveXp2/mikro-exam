@@ -1,4 +1,5 @@
 #include "DFRobot_RGBLCD1602.h"
+#include "mbed.h"
 
 
 #ifndef ALARMCLOCK_H
@@ -14,7 +15,7 @@ class AlarmClock {
 public:
     AlarmClock();
     
-    void update(time_t currentTime);
+    void update();
     void setTimer(int hour, int minute);
     void enable(bool is_on);
     void snooze();
@@ -24,6 +25,7 @@ public:
     int get_hour() const; 
     int get_minute() const;
     void set_alarm(int hour, int minute);
+    void start();
 
 private:
     AlarmState state;
@@ -38,6 +40,14 @@ private:
     void deactivate();
     int hour; 
     int minute;
+
+    Thread buzzer_thread; 
+    EventFlags flags;
+
+    void buzzer_task();
+
+    static constexpr uint32_t BUZZER_ON = 1 << 0;
+    static constexpr uint32_t BUZZER_STOP = 1 << 1;
 };
 
 #endif //ALARMCLOCK_H

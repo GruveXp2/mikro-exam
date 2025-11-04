@@ -3,7 +3,7 @@
 #include "Network.h"
 
 NewsFeed::NewsFeed(Menu* menu, int& buttonFlags, NetworkInterface* network)
-    : View(menu, buttonFlags), network(network), update_thread(osPriorityLow) {
+    : View(menu, buttonFlags), network(network), update_thread(osPriorityNormal) {
         update_thread.start(callback(this, &NewsFeed::thread_task));
     }
 
@@ -37,7 +37,7 @@ void NewsFeed::draw(DFRobot_RGBLCD1602* lcd) {
         std::string text = headlines[headlineIndex];
 
         // Adds spaces between the headlines
-        text += "                ";  
+        text = "                " + text + "                ";
 
         std::string window = text.substr(scrollingIndex, lcdWidth);
 
