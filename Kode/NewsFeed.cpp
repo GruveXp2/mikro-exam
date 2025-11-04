@@ -54,7 +54,6 @@ void NewsFeed::draw(DFRobot_RGBLCD1602* lcd) {
 }
 
 void NewsFeed::thread_task(){
-    ThisThread::sleep_for(5s);
     while(1){
         printf("Fetching news feed api\n");
         fflush(stdout);
@@ -66,6 +65,8 @@ void NewsFeed::thread_task(){
 }
 
 void NewsFeed::update() {
+    Network::networkAccess.acquire(); // only 1 thread can use network at the same time to save memory
+
     TLSSocket* socket = new TLSSocket();
     std::string newsHost = "feeds.bbci.co.uk";
     std::string newsPath = "/news/world/rss.xml";
@@ -155,6 +156,8 @@ void NewsFeed::update() {
     }
     socket->close();
     delete socket;
+
+    Network::networkAccess.release();
 }
 
 

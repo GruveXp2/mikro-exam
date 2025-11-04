@@ -75,6 +75,8 @@ void WeatherView::thread_task(){
 
 
 void WeatherView::update() {
+    Network::networkAccess.acquire(); // only 1 thread can use network at the same time to save memory
+
     TLSSocket* socket = new TLSSocket();
     std::string weatherHost = "api.met.no";
     std::string weatherPath = "/weatherapi/locationforecast/2.0/compact?lat=" + longitude + "&lon=" + latitude;
@@ -198,6 +200,8 @@ void WeatherView::update() {
     }
     socket->close();
     delete socket;
+    
+    Network::networkAccess.release();
 }
 
 

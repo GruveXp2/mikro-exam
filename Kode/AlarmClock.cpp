@@ -72,8 +72,10 @@ void AlarmClock::setTimer(int hour, int minute){
     state = AlarmState::Enabled;
 }
 
-void AlarmClock::enable(bool is_on){
-    state = is_on ? AlarmState::Enabled : AlarmState::Disabled;
+void AlarmClock::toggle() {
+    if (state == AlarmState::Disabled) {
+        state = AlarmState::Enabled;
+    } else state = AlarmState::Disabled;
 }
 
 void AlarmClock::snooze(){
@@ -92,6 +94,3 @@ void AlarmClock::mute(){
 AlarmState AlarmClock::get_AlarmClock_State() const {return state;}
 int AlarmClock::get_hour() const {return hour;}
 int AlarmClock::get_minute() const {return minute;}
-
-
-
