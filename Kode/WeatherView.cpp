@@ -153,8 +153,6 @@ void WeatherView::update() {
                 // Wrap in root object
                 std::string minimalJson = "{\"timeseries\":" + timeseriesChunk + "}";
 
-                printf("Extracted minimal JSON:\n%s\n", minimalJson.c_str());
-
                 // Parse JSON now
                 json jsonData = json::parse(minimalJson, nullptr, false);
                 if (jsonData.is_discarded()) {
