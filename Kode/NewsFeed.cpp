@@ -1,6 +1,7 @@
 #include "Menu.h"
 #include "NewsFeed.h"
 #include "Network.h"
+#include <cstdio>
 
 NewsFeed::NewsFeed(Menu* menu, int& buttonFlags, NetworkInterface* network)
     : View(menu, buttonFlags), network(network), update_thread(osPriorityNormal) {
@@ -67,6 +68,7 @@ void NewsFeed::thread_task(){
 void NewsFeed::update() {
     Network::networkAccess.acquire(); // only 1 thread can use network at the same time to save memory
 
+    printf("========== Fetching News ==========\n");
     TLSSocket* socket = new TLSSocket();
     std::string newsHost = "feeds.bbci.co.uk";
     std::string newsPath = "/news/world/rss.xml";
@@ -157,6 +159,7 @@ void NewsFeed::update() {
     socket->close();
     delete socket;
 
+    printf("======= Success =======\n");
     Network::networkAccess.release();
 }
 
