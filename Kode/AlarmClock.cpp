@@ -5,8 +5,8 @@
 
 AlarmClock::AlarmClock ()
     : hour(0), minute(0), state(AlarmState::Disabled),
-    snoozeTimer(0), activeTimer(0), buzzer(D12) {
-        buzzer_thread.start(callback(this, &AlarmClock::buzzer_task));
+    snoozeTimer(0), activeTimer(0), buzzer(D12), buzzer_thread(osPriorityLow) {
+        //buzzer_thread.start(callback(this, &AlarmClock::buzzer_task));
     }
 
 void AlarmClock::buzzer_task(){
