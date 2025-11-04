@@ -17,7 +17,7 @@ public:
     
     void update();
     void setTimer(int hour, int minute);
-    void enable(bool is_on);
+    void toggle();
     void snooze();
     void mute();
 

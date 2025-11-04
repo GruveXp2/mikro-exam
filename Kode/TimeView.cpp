@@ -44,12 +44,31 @@ void TimeView::draw(DFRobot_RGBLCD1602* lcd) {
 }
 
 void TimeView::checkButtons() {
-    if (isButtonPressed(1)) {
-        menu->prevView();
-    } else if (isButtonPressed(2)) {
-        menu->nextView();
-    } else if (isButtonPressed(3)) {
-        menu->showView(ViewType::SET_ALARM);
+    if (isButtonPressed(0)) { // button 0 will always toggle alarm on/off
+        alarmClock.toggle();
+        return;
+    }
+
+    AlarmState alarmState = alarmClock.get_AlarmClock_State();
+    switch (alarmState) {
+        case AlarmState::Active:
+            if (isButtonPressed(3)) {
+                alarmClock.snooze();
+            }
+        case AlarmState::Snooze:
+            if (isButtonPressed(1) || isButtonPressed(2)) {
+                alarmClock.mute();
+            } 
+            return;
+        case AlarmState::Enabled:
+        case AlarmState::Disabled:
+            if (isButtonPressed(1)) {
+                menu->prevView();
+            } else if (isButtonPressed(2)) {
+                menu->nextView();
+            } else if (isButtonPressed(3)) {
+                menu->showView(ViewType::SET_ALARM);
+            }
+
     }
 }
-
