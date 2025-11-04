@@ -3,6 +3,8 @@
 #include <cstring>
 #include <string>
 
+Semaphore Network::networkAccess(1, 1);
+
 NetworkInterface* Network::getNetworkInterFace() {
     printf("Getting network interface.. ");fflush(stdout);
     NetworkInterface *network = NetworkInterface::get_default_instance();
