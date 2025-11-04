@@ -1,5 +1,6 @@
 #include "Menu.h"
 #include "AlarmClock.h"
+#include <cstdio>
 #include <ctime>
 
 AlarmClock::AlarmClock ()
@@ -53,8 +54,7 @@ void AlarmClock::setTimer(int hour, int minute){
 void AlarmClock::toggle() {
     if (state == AlarmState::Disabled) {
         state = AlarmState::Enabled;
-    }
-    state = AlarmState::Disabled;
+    } else state = AlarmState::Disabled;
 }
 
 void AlarmClock::snooze(){
