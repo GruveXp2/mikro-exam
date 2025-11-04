@@ -5,28 +5,30 @@
 
 AlarmClock::AlarmClock ()
     : hour(0), minute(0), state(AlarmState::Disabled),
-    snoozeTimer(0), activeTimer(0), buzzer(D12) {
-        buzzer_thread.start(callback(this, &AlarmClock::buzzer_task));
-    }
+    snoozeTimer(0), activeTimer(0), buzzer(D12) {}
 
 void AlarmClock::buzzer_task(){
     buzzer.period(0.001f);
     buzzer.write(0);
+    bool beep = true;
 
     while(true){
-        uint32_t flags_read = flags.wait_any(BUZZER_ON | BUZZER_STOP);
-        if (flags_read & BUZZER_ON){
-            printf("Buzzer is buzzing");
-            buzzer.write(0.5);
+        flags.wait_any(BUZZER_ON);
+        printf("The current flags is: %d\n", flags.get());
+        while (!(flags.get() & BUZZER_STOP)) {
+            buzzer.write(beep ? 0.5f : 0.0f);
+            beep = !beep;
+            flags.wait_any_for(BUZZER_STOP, 250ms); // hvis noen skrur av alarmen så skippes venting og skrur av med en gang
         }
-
-        if (flags_read & BUZZER_STOP){
-            printf("Buzzer is stopping");
-            buzzer.write(0);
-        }
+        printf("The irritating beeping is now finally over\n");
+        buzzer.write(0);
+        flags.clear(BUZZER_ON | BUZZER_STOP);
     }
 }
 
+void AlarmClock::init() {
+    buzzer_thread.start(callback(this, &AlarmClock::buzzer_task));
+}
 
 void AlarmClock::update(){
     if (state == AlarmState::Disabled) return; 
@@ -69,19 +71,27 @@ void AlarmClock::deactivate(){
 void AlarmClock::setTimer(int hour, int minute){
     this -> hour = hour;
     this -> minute = minute;
-    state = AlarmState::Enabled;
+    if (state == AlarmState::Disabled) {
+        toggle();
+    }
 }
 
 void AlarmClock::toggle() {
     if (state == AlarmState::Disabled) {
         state = AlarmState::Enabled;
+        if (!isBuzzerInited) {
+            init();
+            isBuzzerInited = true;
+        }
     } else state = AlarmState::Disabled;
 }
 
 void AlarmClock::snooze(){
+    printf("its now gonna snooze\n");
     if (state == AlarmState::Active){
         snoozeTimer = time(NULL) + SNOOZ_DURATION;
         state = AlarmState::Snooze;
+        flags.set(BUZZER_STOP);
     }
 }
 
