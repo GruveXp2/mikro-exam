@@ -18,6 +18,7 @@ public:
     void update();
     void setTimer(int hour, int minute);
     void enable(bool is_on);
+    
     void snooze();
     void mute();
 
@@ -29,6 +30,7 @@ public:
 
 private:
     AlarmState state;
+    PwmOut buzzer;
 
     time_t snoozeTimer;     
     time_t activeTimer; 
@@ -48,6 +50,9 @@ private:
 
     static constexpr uint32_t BUZZER_ON = 1 << 0;
     static constexpr uint32_t BUZZER_STOP = 1 << 1;
+
+
+
 };
 
 #endif //ALARMCLOCK_H
