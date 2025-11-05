@@ -43,6 +43,7 @@ private:
     void deactivate();
     int hour; 
     int minute;
+    int lastTriggeredMinute;
 
     Thread buzzer_thread; 
     EventFlags flags;

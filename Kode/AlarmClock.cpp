@@ -1,11 +1,13 @@
 #include "Menu.h"
 #include "AlarmClock.h"
+#include <cstdint>
 #include <cstdio>
 #include <ctime>
 
 AlarmClock::AlarmClock ()
     : hour(0), minute(0), state(AlarmState::Disabled),
-    snoozeTimer(0), activeTimer(0), buzzer(D12) {}
+    snoozeTimer(0), activeTimer(0), buzzer(D12), lastTriggeredMinute(-1) {
+    }
 
 void AlarmClock::buzzer_task(){
     buzzer.period(0.001f);
@@ -14,13 +16,11 @@ void AlarmClock::buzzer_task(){
 
     while(true){
         flags.wait_any(BUZZER_ON);
-        printf("The current flags is: %d\n", flags.get());
         while (!(flags.get() & BUZZER_STOP)) {
             buzzer.write(beep ? 0.5f : 0.0f);
             beep = !beep;
-            flags.wait_any_for(BUZZER_STOP, 250ms); // hvis noen skrur av alarmen så skippes venting og skrur av med en gang
-        }
-        printf("The irritating beeping is now finally over\n");
+            flags.wait_any_for(BUZZER_STOP, 250ms, false); // hvis noen skrur av alarmen så skippes venting og skrur av med en gang
+        }   
         buzzer.write(0);
         flags.clear(BUZZER_ON | BUZZER_STOP);
     }
@@ -39,14 +39,15 @@ void AlarmClock::update(){
     int currentMinute = localtm -> tm_min;
 
     if (state == AlarmState::Enabled) {
-        if (currentHour == hour && currentMinute == minute) {
+        if (currentHour == hour && currentMinute == minute && lastTriggeredMinute != currentMinute) {
             active();
+            lastTriggeredMinute = currentMinute; //Won't trigger/reactivate for the same minute
         }
     }
 
     if(state == AlarmState::Active){
         if (currentTime - activeTimer >= AUTO_MUTE_TIMER){
-            state = AlarmState::Enabled;
+            deactivate();
         }
     }
 
@@ -58,6 +59,7 @@ void AlarmClock::update(){
 }
 
 void AlarmClock::active(){
+    flags.clear(BUZZER_STOP);
     state = AlarmState::Active; 
     activeTimer = time(NULL);
     flags.set(BUZZER_ON);
@@ -87,7 +89,6 @@ void AlarmClock::toggle() {
 }
 
 void AlarmClock::snooze(){
-    printf("its now gonna snooze\n");
     if (state == AlarmState::Active){
         snoozeTimer = time(NULL) + SNOOZ_DURATION;
         state = AlarmState::Snooze;
@@ -97,7 +98,8 @@ void AlarmClock::snooze(){
 
 void AlarmClock::mute(){
     if (state == AlarmState::Active || state == AlarmState::Snooze){
-        deactivate();
+        state = AlarmState::Enabled;
+        flags.set(BUZZER_STOP);
     }
 }
 
