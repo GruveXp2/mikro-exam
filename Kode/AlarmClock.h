@@ -52,6 +52,10 @@ private:
 
     static constexpr uint32_t BUZZER_ON = 1 << 0;
     static constexpr uint32_t BUZZER_STOP = 1 << 1;
+
+    void playTone(float frequency, float duration);
+    bool playMegalovania();
+    bool megalovania = true;
 };
 
 #endif //ALARMCLOCK_H
