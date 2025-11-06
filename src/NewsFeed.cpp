@@ -30,11 +30,11 @@ const char* SSL_CA_PEM2 =
 "-----END CERTIFICATE-----\n";
 
 void NewsFeed::draw(DFRobot_RGBLCD1602* lcd) {
-    newsFeed_mutex.lock();
     lcd->setCursor(0, 0);
     lcd->printf("BBC NEWS");
 
     if (!headlines.empty()) {
+        newsFeed_mutex.lock();
         std::string text = headlines[headlineIndex];
 
         // Adds spaces between the headlines
@@ -50,17 +50,15 @@ void NewsFeed::draw(DFRobot_RGBLCD1602* lcd) {
             scrollingIndex = 0;
             headlineIndex = (headlineIndex + 1) % headlines.size(); // next headline
         }
+        newsFeed_mutex.unlock();
     }
-    newsFeed_mutex.unlock();
 }
 
 void NewsFeed::thread_task(){
     while(1){
         printf("Fetching news feed api\n");
         fflush(stdout);
-        newsFeed_mutex.lock();
         update();
-        newsFeed_mutex.unlock();
         ThisThread::sleep_for(15min); //Sleeps the thread for 15min (Since the assignment did not specify, we just picked 15min)
     }
 }
@@ -110,7 +108,9 @@ void NewsFeed::update() {
     int titleCount = 0;
     bool insideItem = false;
 
+    newsFeed_mutex.lock();
     headlines.clear();
+    newsFeed_mutex.unlock();
 
     while (true) {
         int r = socket->recv(buffer, BUFFER_SIZE);
@@ -149,7 +149,9 @@ void NewsFeed::update() {
                             [](char c){ return c=='<' || c=='>' || c=='[' || c==']'; }),
                             title.end());
 
+                newsFeed_mutex.lock();
                 headlines.push_back(title);
+                newsFeed_mutex.unlock();
             }
             xmlChunk.erase(0, itemEnd + 7);
 

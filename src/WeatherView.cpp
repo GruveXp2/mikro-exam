@@ -66,9 +66,7 @@ void WeatherView::thread_task(){
     while(1){
         printf("Fetching weather api\n");
         fflush(stdout);
-        weather_mutex.lock();
         update();
-        weather_mutex.unlock();
         ThisThread::sleep_for(15min); //Sleep the thread for 15 min before update
     }
 }
@@ -169,7 +167,9 @@ void WeatherView::update() {
                         firstEntry["data"]["instant"].contains("details") &&
                         firstEntry["data"]["instant"]["details"].contains("air_temperature")) {
 
+                        weather_mutex.lock(); // stop main thread from reading temp when this thread modifies it
                         this->temp = firstEntry["data"]["instant"]["details"]["air_temperature"];
+                        weather_mutex.unlock();
                         printf("Air temperature: %.2f°C\n", temp);
                     } else {
                         printf("Missing expected air_temperature key\n");
@@ -179,7 +179,9 @@ void WeatherView::update() {
                         firstEntry["data"]["next_1_hours"].contains("summary") &&
                         firstEntry["data"]["next_1_hours"]["summary"].contains("symbol_code")) {
 
+                        weather_mutex.lock(); // stop main thread from reading lastCondition when this thread modifies it
                         this-> lastCondition = firstEntry["data"]["next_1_hours"]["summary"]["symbol_code"];
+                        weather_mutex.unlock();
                         printf("Weather symbol code: %s\n", lastCondition.c_str());
                     } else {
                         printf("Missing next_1_hours symbol_code\n");
