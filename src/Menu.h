@@ -9,8 +9,9 @@
 #include "View.h"
 #include "AlarmClock.h"
 #include "ViewType.h"
-
-// this class holds all the views, shows them and has logic to switch between them
+/**
+ * this class holds all the views, shows them and has logic to switch between them
+ */
 class Menu {
 public:
     Menu(DFRobot_RGBLCD1602& lcd, int& buttonFlags, NetworkInterface* netowork, std::string& longitude, std::string& latitude);

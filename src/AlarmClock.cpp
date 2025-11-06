@@ -20,7 +20,7 @@ void AlarmClock::buzzer_task(){
         while (!(flags.get() & BUZZER_STOP)) {
             if (megalovania) {
                 bool result = playMegalovania(); // result is false if it was stopped before finishing
-                // if it wasnt stopped and finished playing, megalovania will be false and it will play regular beeping instead
+                // if it wasnt stopped and finished playing (returning true), megalovania will be false and it will play regular beeping instead
                 if (!result) break; else megalovania = false;
                 continue;
             }
