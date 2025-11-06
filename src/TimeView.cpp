@@ -25,14 +25,14 @@ void TimeView::draw(DFRobot_RGBLCD1602* lcd) {
     int hour = alarmClock.get_hour();
     int minute = alarmClock.get_minute();
 
-    // Switch case based on which state the alarm clock is in and displayes it 
+    // Switch case based on which state the alarm clock is in and displayes it
     switch(state){
         case AlarmState::Disabled:
         lcd->printf("                "); // Fills in space for disbaled state
         break;
 
         case AlarmState::Enabled:
-        lcd->printf("Alarm     %02d:%02d", hour, minute); 
+        lcd->printf("Alarm     %02d:%02d", hour, minute);
         break;
 
         case AlarmState::Active:

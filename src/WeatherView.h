@@ -18,7 +18,9 @@ public:
     void checkButtons() override;
     void draw(DFRobot_RGBLCD1602* lcd) override;
 
-private:    
+    void requestUpdate();
+
+private:
     NetworkInterface* network;
 
     std::string longitude;
@@ -34,6 +36,8 @@ private:
 
     void update();
     void thread_task();
+    EventFlags flags;
+    static const uint32_t FLAG_UPDATE_WEATHER = 0x1;
 };
 
 #endif //WEATHERVIEW_H

@@ -4,6 +4,9 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
+/**
+ * Used to do network related things with sockets. Has a semaphore so no more than 1 thread acces it at once
+ */
 class Network {
 public:
     static bool connectToWifi(NetworkInterface* network);

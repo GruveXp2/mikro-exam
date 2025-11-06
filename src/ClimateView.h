@@ -14,8 +14,8 @@ public:
     void draw(DFRobot_RGBLCD1602* lcd) override;
 private:
     DevI2C i2c;
-    HTS221Sensor sensor; 
-    float temperature; 
+    HTS221Sensor sensor; // HTS221 instance
+    float temperature;
     float humidity;
 };
 

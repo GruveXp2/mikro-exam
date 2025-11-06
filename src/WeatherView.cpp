@@ -62,15 +62,13 @@ void WeatherView::draw(DFRobot_RGBLCD1602* lcd) {
     weather_mutex.unlock();
 }
 
-// Thread task to fetch the weather api 
+// Thread task to fetch the weather api
 void WeatherView::thread_task(){
     while(1){
         printf("Fetching weather api\n");
         fflush(stdout);
-        weather_mutex.lock();
         update();
-        weather_mutex.unlock();
-        ThisThread::sleep_for(15min); //Sleep the thread for 15 min before update
+        flags.wait_any(FLAG_UPDATE_WEATHER, 15min); // next update in 15min unless the user wants to update now (by changing longitude and latidude)
     }
 }
 
@@ -95,7 +93,7 @@ void WeatherView::update() {
     nsapi_size_or_error_t sentBytes = 0;
     const char* sendPtr = httpRequest.c_str();
 
-    // Loops as long there are more data 
+    // Loops as long there are more data
     while (bytesToSend) {
         sentBytes = socket->send(sendPtr, bytesToSend);
         if (sentBytes < 0) { // Cheks if the sent bytes are negative, if so breaks the loop
@@ -111,9 +109,9 @@ void WeatherView::update() {
       while (1);
     }
 
-    
-    static char buffer[BUFFER_SIZE];  // Define the buffer with a set size 
-    memset(buffer, 0, BUFFER_SIZE);   // Clears the buffer 
+
+    static char buffer[BUFFER_SIZE];  // Define the buffer with a set size
+    memset(buffer, 0, BUFFER_SIZE);   // Clears the buffer
     std::string shorten_json;
     bool found_array_start= false;
     // Index where the JSON array starts and ends
@@ -121,11 +119,11 @@ void WeatherView::update() {
     size_t json_end = std::string::npos;
 
     while (true) {
-        // Receving data 
+        // Receving data
         int received_bytes = socket->recv(buffer, BUFFER_SIZE);
-        if (received_bytes <= 0) break;  // Brekas if the byte's sent is negative or 0 
+        if (received_bytes <= 0) break;  // Brekas if the byte's sent is negative or 0
 
-        shorten_json.append(buffer, received_bytes); 
+        shorten_json.append(buffer, received_bytes);
 
         if (!found_array_start) {
             size_t firstTimeseries= shorten_json.find("\"timeseries\":[{"); // Look for the start of the timeseries
@@ -166,17 +164,19 @@ void WeatherView::update() {
                     return;
                 }
 
-                // Extract the infromastion from the JSON, like air_temp and humidity 
+                // Extract the infromastion from the JSON, like air_temp and humidity
                 if (jsonData.contains("timeseries") && !jsonData["timeseries"].empty()) {
                     auto& firstEntry = jsonData["timeseries"][0]; // Takes the first entry of the timeseries
 
-                    // Get air_temperature 
+                    // Get air_temperature
                     if (firstEntry.contains("data") &&
                         firstEntry["data"].contains("instant") &&
                         firstEntry["data"]["instant"].contains("details") &&
                         firstEntry["data"]["instant"]["details"].contains("air_temperature")) {
 
+                        weather_mutex.lock(); // stop main thread from reading temp when this thread modifies it
                         this->temp = firstEntry["data"]["instant"]["details"]["air_temperature"];
+                        weather_mutex.unlock();
                         printf("Air temperature: %.2f°C\n", temp);
                     } else {
                         printf("Missing expected air_temperature key\n");
@@ -187,7 +187,9 @@ void WeatherView::update() {
                         firstEntry["data"]["next_1_hours"].contains("summary") &&
                         firstEntry["data"]["next_1_hours"]["summary"].contains("symbol_code")) {
 
+                        weather_mutex.lock(); // stop main thread from reading lastCondition when this thread modifies it
                         this-> lastCondition = firstEntry["data"]["next_1_hours"]["summary"]["symbol_code"];
+                        weather_mutex.unlock();
                         printf("Weather symbol code: %s\n", lastCondition.c_str());
                     } else {
                         printf("Missing next_1_hours symbol_code\n");
@@ -196,7 +198,7 @@ void WeatherView::update() {
                 } else {
                     printf("Missing timeseries array in JSON\n");
                 }
-                
+
                 // Clear of stored JSAON data to free up memory
                 jsonData.clear();
                 shorten_json.clear();
@@ -224,4 +226,8 @@ void WeatherView::checkButtons() {
     } else if (isButtonPressed(3)) {
         menu->showView(ViewType::SET_LOCATION);
     }
+}
+
+void WeatherView::requestUpdate() {
+    flags.set(FLAG_UPDATE_WEATHER);
 }

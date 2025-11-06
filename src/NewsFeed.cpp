@@ -31,15 +31,15 @@ const char* SSL_CA_PEM2 =
 
 // Function to draw the news feed
 void NewsFeed::draw(DFRobot_RGBLCD1602* lcd) {
-    newsFeed_mutex.lock();
     lcd->setCursor(0, 0);
     lcd->printf("BBC NEWS");
 
     // Lcd scrolling functionality
     if (!headlines.empty()) {
+        newsFeed_mutex.lock();
         std::string text = headlines[headlineIndex];
 
-        // Adds space between the headline 
+        // Adds spaces between the headlines
         text = "                " + text + "                ";
 
         std::string window = text.substr(scrollingIndex, lcdWidth);
@@ -49,7 +49,7 @@ void NewsFeed::draw(DFRobot_RGBLCD1602* lcd) {
 
         scrollingIndex++;  // Moves the scrolling index to the next
 
-        if (scrollingIndex + lcdWidth > text.length()) { // Cheks if we are at the end of the text 
+        if (scrollingIndex + lcdWidth > text.length()) { // Cheks if we are at the end of the text
             scrollingIndex = 0;  // Start the scrolling from the beginning
             headlineIndex = (headlineIndex + 1) % headlines.size(); // Move to the next headline
         }
@@ -62,9 +62,7 @@ void NewsFeed::thread_task(){
     while(1){
         printf("Fetching news feed api\n");
         fflush(stdout);
-        newsFeed_mutex.lock();
         update();
-        newsFeed_mutex.unlock();
         ThisThread::sleep_for(15min); //Sleeps the thread for 15min (Since the assignment did not specify, we just picked 15min)
     }
 }
@@ -90,7 +88,7 @@ void NewsFeed::update() {
 
     printf("\nHTTP GET: %s%s\n", newsHost.c_str(), newsPath.c_str());
 
-    // Loops as long there are more data 
+    // Loops as long there are more data
     while (bytesToSend) {
         sentBytes = socket->send(httpRequest.c_str() + sentBytes, bytesToSend);
         if (sentBytes < 0) { // Cheks if the sent bytes are negative, if so breaks the loop
@@ -108,17 +106,19 @@ void NewsFeed::update() {
     }
     
     static char buffer[BUFFER_SIZE]; // Define the buffer with a set size
-    memset(buffer, 0, BUFFER_SIZE);  // Clears the buffer 
+    memset(buffer, 0, BUFFER_SIZE);  // Clears the buffer
     std::string xmlChunk;
     int titleCount = 0;              // Count on how many headlines
     bool insideItem = false;
     size_t itemStart;
-    size_t itemEnd;         
+    size_t itemEnd;
 
-    headlines.clear();               // Clear headline vector 
+    newsFeed_mutex.lock();
+    headlines.clear();   // Clear headline vector
+    newsFeed_mutex.unlock();
 
     while (true) {
-        // Receving data 
+        // Receving data
         int received_bytes = socket->recv(buffer, BUFFER_SIZE);
         if (received_bytes <= 0 || titleCount >= 3) break;  // Breaks if the byte's sent is negative or 0 or we have 3 headlines
 
@@ -131,11 +131,11 @@ void NewsFeed::update() {
         // Looks start of the <item>
         size_t firstItem = xmlChunk.find("<item>");
         if (firstItem != std::string::npos) {
-            insideItem = true;                  
+            insideItem = true;
             xmlChunk.erase(0, firstItem);  // Remove everything before <item>
         }
 
-        // Loops through all complete <item> blocks 
+        // Loops through all complete <item> blocks
         while ((itemStart = xmlChunk.find("<item>")) != std::string::npos &&
             (itemEnd = xmlChunk.find("</item>", itemStart)) != std::string::npos) {
 
@@ -158,7 +158,10 @@ void NewsFeed::update() {
                             [](char c){ return c=='<' || c=='>' || c=='[' || c==']'; }),
                             title.end());
 
-                headlines.push_back(title); // Pushes the headlines in the vector
+
+                newsFeed_mutex.lock();
+                headlines.push_back(title);  // Pushes the headlines in the vector
+                newsFeed_mutex.unlock();
             }
             xmlChunk.erase(0, itemEnd + 7); // Clears the std::string to save up some space
 
@@ -166,7 +169,7 @@ void NewsFeed::update() {
         }
     }
     // Close network socket and free up its memory, avoiding memory leak
-    socket->close();   
+    socket->close();
     delete socket;  
 
     printf("======= Success =======\n");

@@ -6,11 +6,12 @@
 #ifndef MENU_H
 #define MENU_H
 
-//class View; // fikser sirkulær include pga Menu og Views må vite om hverandre
-#include "View.h" // 👈 MÅ inkluderes her
+#include "View.h"
 #include "AlarmClock.h"
 #include "ViewType.h"
-
+/**
+ * this class holds all the views, shows them and has logic to switch between them
+ */
 class Menu {
     // Holder styr på alle views, og hvilken view som er oppe
 public:
@@ -27,10 +28,11 @@ public:
     void checkButtons();
 
     AlarmClock& getAlarmClock() {return alarmClock;}
+    void notifyLocationUpdated();
 protected:
-    int currentViewIndex = 0;
+    int currentViewIndex = 0; // which of the normal views that is currently shown. does not include the settings views
     std::vector<std::unique_ptr<View>> views;
-    bool refresh = false;
+    bool refresh = false; // if the screen should clear before next draw. Prevents unneccesary flashing
 
     DFRobot_RGBLCD1602* lcd;
     AlarmClock alarmClock;

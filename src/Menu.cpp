@@ -23,7 +23,7 @@ Menu::Menu(DFRobot_RGBLCD1602& lcd, int& buttonFlags, NetworkInterface* network,
 
 void Menu::draw() {
     if (refresh) {
-        lcd->clear();
+        lcd->clear(); // only clear if needed, like when switching views
         refresh = false;
     }
     views.at(currentViewIndex)->draw(lcd);
@@ -50,6 +50,8 @@ void Menu::showView(ViewType view) {
     refresh = true;
     currentViewIndex = static_cast<int>(view);
     if (currentViewIndex > static_cast<int>(ViewType::COUNT)) {
+        // for special views for changing settings
+        // since ViewType::COUNT isnt its own view, all ViewTypes after will have 1 higher value than their actual index in the views vector
         currentViewIndex--;
         lcd->setRGB(255,255,0);
     } else {
@@ -59,4 +61,8 @@ void Menu::showView(ViewType view) {
 
 void Menu::checkButtons() {
     views.at(currentViewIndex)->checkButtons();
+}
+
+void Menu::notifyLocationUpdated() {
+    views.at(ViewType::WEATHER)->requestUpdate();
 }
