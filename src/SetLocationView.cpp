@@ -10,9 +10,10 @@
 
 const std::string SetLocationView::symbols = "0123456789.";
 
-SetLocationView::SetLocationView(Menu* menu, int& buttonFlags, std::string& longitude, std::string& latitude)
-        : View(menu, buttonFlags), longitude(longitude), latitude(latitude), currentlySetting(&longitude) {
-}
+SetLocationView::SetLocationView(Menu* menu, int& buttonFlags,
+        std::string& longitude, std::string& latitude, EventFlags& locationFlag)
+        : View(menu, buttonFlags), longitude(longitude), latitude(latitude),
+        currentlySetting(&longitude), locationFlag(locationFlag) {}
 
 void SetLocationView::draw(DFRobot_RGBLCD1602* lcd) {
     switch (currentSubView) {
@@ -60,7 +61,7 @@ void SetLocationView::checkButtons() {
     switch (currentSubView) {
         case SELECTING_AXIS:
             if (isButtonPressed(0)) {
-                menu->notifyLocationUpdated();
+                locationFlag.set(Menu::FLAG_UPDATED_LOCATION); // make weather view update
                 menu->showView(ViewType::WEATHER); // save and return to weather view
             } else if (isButtonPressed(1) || isButtonPressed(2)) { // switch between selecting long vs lat
                 isSettingLongitude = !isSettingLongitude;

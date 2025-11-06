@@ -14,9 +14,9 @@ Menu::Menu(DFRobot_RGBLCD1602& lcd, int& buttonFlags, NetworkInterface* network,
         lcd(&lcd), latitude(latitude), longitude(longitude) {
     views.push_back(std::make_unique<TimeView>(this, buttonFlags, alarmClock));
     views.push_back(std::make_unique<ClimateView>(this, buttonFlags));
-    views.push_back(std::make_unique<WeatherView>(this, buttonFlags, network, longitude, latitude));
+    views.push_back(std::make_unique<WeatherView>(this, buttonFlags, network, longitude, latitude, locationFlag));
     views.push_back(std::make_unique<NewsFeed>(this, buttonFlags, network));
-    views.push_back(std::make_unique<SetLocationView>(this, buttonFlags, longitude, latitude));
+    views.push_back(std::make_unique<SetLocationView>(this, buttonFlags, longitude, latitude, locationFlag));
     views.push_back(std::make_unique<SetAlarmView>(this, buttonFlags, alarmClock));
     lcd.setRGB(0,255,127);
 }
@@ -61,14 +61,5 @@ void Menu::showView(ViewType view) {
 
 void Menu::checkButtons() {
     views.at(currentViewIndex)->checkButtons();
-}
-
-void Menu::notifyLocationUpdated() {
-    // Get pointer to view and cast to WeatherView*
-    auto* weatherView = dynamic_cast<WeatherView*>(views.at(static_cast<int>(ViewType::WEATHER)).get());
-    
-    if (weatherView) {
-        weatherView->requestUpdate();
-    }
 }
 

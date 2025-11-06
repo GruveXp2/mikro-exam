@@ -28,7 +28,7 @@ public:
     void checkButtons();
 
     AlarmClock& getAlarmClock() {return alarmClock;}
-    void notifyLocationUpdated();
+    static const uint32_t FLAG_UPDATED_LOCATION = 0x1;
 protected:
     int currentViewIndex = 0; // which of the normal views that is currently shown. does not include the settings views
     std::vector<std::unique_ptr<View>> views;
@@ -39,8 +39,7 @@ protected:
     std::string& longitude;
     std::string& latitude;
 
-    EventFlags flags;
-    static const uint32_t FLAG_UPDATE_WEATHER = 0x1;
+    EventFlags locationFlag;
 };
 
 #endif //MENU_H

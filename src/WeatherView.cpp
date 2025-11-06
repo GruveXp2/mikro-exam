@@ -5,10 +5,13 @@
 #include "Network.h"
 #include <ctime>
 
-WeatherView::WeatherView(Menu* menu, int& buttonFlags, NetworkInterface* network, const std::string& longitude, const std::string& latitude)
-    : View(menu, buttonFlags), network(network), longitude(longitude), latitude(latitude), update_thread(osPriorityNormal) {
-        update_thread.start(callback(this, &WeatherView::thread_task));
-    }
+WeatherView::WeatherView(Menu* menu, int& buttonFlags, NetworkInterface* network,
+        const std::string& longitude, const std::string& latitude, EventFlags& locationFlag)
+        : View(menu, buttonFlags), network(network), longitude(longitude),
+        latitude(latitude), update_thread(osPriorityNormal), locationFlag(locationFlag) {
+            
+    update_thread.start(callback(this, &WeatherView::thread_task));
+}
 
 const char* SSL_CA_PEM1 =   
 "-----BEGIN CERTIFICATE-----\n"
@@ -68,7 +71,7 @@ void WeatherView::thread_task(){
         printf("Fetching weather api\n");
         fflush(stdout);
         update();
-        flags.wait_any_for(FLAG_UPDATE_WEATHER, 15min); // next update in 15min unless the user wants to update now (by changing longitude and latidude)
+        locationFlag.wait_any_for(Menu::FLAG_UPDATED_LOCATION, 15min); // next update in 15min unless the user wants to update now (by changing longitude and latidude)
     }
 }
 
@@ -226,8 +229,4 @@ void WeatherView::checkButtons() {
     } else if (isButtonPressed(3)) {
         menu->showView(ViewType::SET_LOCATION);
     }
-}
-
-void WeatherView::requestUpdate() {
-    flags.set(FLAG_UPDATE_WEATHER);
 }

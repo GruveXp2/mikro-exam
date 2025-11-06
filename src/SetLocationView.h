@@ -5,7 +5,8 @@
 
 class SetLocationView final : public View {
 public:
-    explicit SetLocationView(Menu* menu, int& buttonFlags, std::string& longitude, std::string& latitude);
+    explicit SetLocationView(Menu* menu, int& buttonFlags,
+            std::string& longitude, std::string& latitude, EventFlags& locationFlag);
     virtual ~SetLocationView() = default;
 
     void checkButtons() override;
@@ -24,6 +25,8 @@ private:
     int symbolIndex = 0;
     int symbolId = 0;
     static const std::string symbols;
+    
+    EventFlags& locationFlag;
 };
 
 #endif //SETLOCATIONVIEW_H

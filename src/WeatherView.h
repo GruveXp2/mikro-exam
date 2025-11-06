@@ -12,13 +12,13 @@ using json = nlohmann::json;
 
 class WeatherView final : public View {
 public:
-    explicit WeatherView(Menu* menu, int& buttonFlags, NetworkInterface* network, const std::string& longitude, const std::string& latitude);
+    explicit WeatherView(Menu* menu, int& buttonFlags,
+            NetworkInterface* network, const std::string& longitude, const std::string& latitude,
+            EventFlags& locationFlag);
     virtual ~WeatherView() = default;
 
     void checkButtons() override;
     void draw(DFRobot_RGBLCD1602* lcd) override;
-
-    void requestUpdate();
 
 private:
     NetworkInterface* network;
@@ -36,6 +36,7 @@ private:
 
     void update();
     void thread_task();
+    EventFlags& locationFlag;
 };
 
 #endif //WEATHERVIEW_H
