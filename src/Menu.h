@@ -27,6 +27,7 @@ public:
     void checkButtons();
 
     AlarmClock& getAlarmClock() {return alarmClock;}
+    void notifyLocationUpdated();
 protected:
     int currentViewIndex = 0; // which of the normal views that is currently shown. does not include the settings views
     std::vector<std::unique_ptr<View>> views;

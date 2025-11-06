@@ -60,6 +60,7 @@ void SetLocationView::checkButtons() {
     switch (currentSubView) {
         case SELECTING_AXIS:
             if (isButtonPressed(0)) {
+                menu.notifyLocationUpdated();
                 menu->showView(ViewType::WEATHER); // save and return to weather view
             } else if (isButtonPressed(1) || isButtonPressed(2)) { // switch between selecting long vs lat
                 isSettingLongitude = !isSettingLongitude;

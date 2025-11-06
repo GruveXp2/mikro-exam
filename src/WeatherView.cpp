@@ -67,7 +67,7 @@ void WeatherView::thread_task(){
         printf("Fetching weather api\n");
         fflush(stdout);
         update();
-        ThisThread::sleep_for(15min); //Sleep the thread for 15 min before update
+        flags.wait_any(FLAG_UPDATE_WEATHER, 15min); // next update in 15min unless the user wants to update now (by changing longitude and latidude)
     }
 }
 
@@ -207,7 +207,6 @@ void WeatherView::update() {
     Network::networkAccess.release();
 }
 
-
 void WeatherView::checkButtons() {
     if (isButtonPressed(1)) {
         menu->prevView();
@@ -216,4 +215,8 @@ void WeatherView::checkButtons() {
     } else if (isButtonPressed(3)) {
         menu->showView(ViewType::SET_LOCATION);
     }
+}
+
+void WeatherView::requestUpdate() {
+    flags.set(FLAG_UPDATE_WEATHER);
 }

@@ -62,3 +62,7 @@ void Menu::showView(ViewType view) {
 void Menu::checkButtons() {
     views.at(currentViewIndex)->checkButtons();
 }
+
+void Menu::notifyLocationUpdated() {
+    views.at(ViewType::WEATHER)->requestUpdate();
+}
