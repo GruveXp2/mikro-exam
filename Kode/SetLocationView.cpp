@@ -16,7 +16,7 @@ SetLocationView::SetLocationView(Menu* menu, int& buttonFlags, std::string& long
 
 void SetLocationView::draw(DFRobot_RGBLCD1602* lcd) {
     switch (currentSubView) {
-        case SELECTING_AXIS:
+        case SELECTING_AXIS: // select the axis, either longitude or latitude
             if (isSettingLongitude) {
                 lcd->setCursor(0, 0);
                 lcd->printf("> Longitude");
@@ -29,7 +29,7 @@ void SetLocationView::draw(DFRobot_RGBLCD1602* lcd) {
                 lcd->printf("> Latitude");
             }
             break;
-        case SELECTING_INDEX:
+        case SELECTING_INDEX: // same as SetAlarmView, moving around a cursor to select which digit to modify
             lcd->setCursor(0, 0);
             lcd->printf("%s", currentlySetting->c_str());
             lcd->setCursor(0, 1);
@@ -45,7 +45,7 @@ void SetLocationView::draw(DFRobot_RGBLCD1602* lcd) {
                 lcd->printf("<->");
             }
             break;
-        case SELECTING_SYMBOL:
+        case SELECTING_SYMBOL: // selecting the symbol of that digit, either 0-9 or a dot
             lcd->setCursor(0, 0);
             lcd->printf("%s", currentlySetting->c_str());
             lcd->setCursor(0, 1);
@@ -60,11 +60,11 @@ void SetLocationView::checkButtons() {
     switch (currentSubView) {
         case SELECTING_AXIS:
             if (isButtonPressed(0)) {
-                menu->showView(ViewType::WEATHER);
-            } else if (isButtonPressed(1) || isButtonPressed(2)) {
+                menu->showView(ViewType::WEATHER); // save and return to weather view
+            } else if (isButtonPressed(1) || isButtonPressed(2)) { // switch between selecting long vs lat
                 isSettingLongitude = !isSettingLongitude;
                 currentlySetting = isSettingLongitude ? &longitude : &latitude;
-            } else if (isButtonPressed(3)) {
+            } else if (isButtonPressed(3)) { // show the number and select digit to modify
                 currentSubView = SELECTING_INDEX;
                 menu->refreshScreen();
             }

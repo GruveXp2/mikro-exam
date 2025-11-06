@@ -4,6 +4,14 @@
 #ifndef SETALARMVIEW_H
 #define SETALARMVIEW_H
 
+
+// The menu will look like this:
+// ----------------
+// setting  00:00
+//  alarm   <->
+//
+// <-> is the cursor, ^ means you are setting a number on a secific digit
+
 class SetAlarmView final : public View {
 public:
     explicit SetAlarmView(Menu* menu, int& buttonFlags, AlarmClock& AlarmClock);
@@ -23,9 +31,6 @@ private:
     int* currentlySetting;
 
     int currentDigit = 0;
-    // ----------------
-    // setting  00:00
-    //  alarm   <->
 };
 
 #endif //SETALARMVIEW_H

@@ -16,7 +16,9 @@ void SetAlarmView::draw(DFRobot_RGBLCD1602* lcd) {
 
     if (isSelectingDigit) {
         lcd->setCursor(0, 1);
-        lcd->printf(" alarm          ");
+        lcd->printf(" alarm          "); // extra spaces to remove the <->
+        // <-> symbolizes teh cursor, you can move left or right to select a different digit
+        // if no digis is to the left, the < isnt gonna be shown. same for the right
         if (currentDigit == 0) {
             lcd->setCursor(9    , 1);
             lcd->printf("->");
@@ -24,7 +26,7 @@ void SetAlarmView::draw(DFRobot_RGBLCD1602* lcd) {
             lcd->setCursor(12, 1);
             lcd->printf("<-");
         } else {
-            lcd->setCursor(7 + currentDigit * 2, 1);
+            lcd->setCursor(7 + currentDigit * 2, 1); // math to make it skip the : between hour and minute
             lcd->printf("<->");
         }
     } else {
@@ -38,30 +40,30 @@ void SetAlarmView::draw(DFRobot_RGBLCD1602* lcd) {
 }
 
 void SetAlarmView::checkButtons() {
-    if (isSelectingDigit) {
-        if (isButtonPressed(0)) {
+    if (isSelectingDigit) { // selecting a digits with the cursor
+        if (isButtonPressed(0)) { // save alarm and return to time view
             alarmClock.setTimer(hour, minute);
             menu->showView(ViewType::TIME);
-        } else if (isButtonPressed(1)) {
+        } else if (isButtonPressed(1)) { // move cursor to the left
             currentDigit --;
-            if (currentDigit < 0) {
+            if (currentDigit < 0) { // wrap around
                 currentDigit = TIME_LENGTH - 1;
             }
-        } else if (isButtonPressed(2)) {
+        } else if (isButtonPressed(2)) { // move cursor to the right
             currentDigit ++;
-            if (currentDigit >= TIME_LENGTH) {
+            if (currentDigit >= TIME_LENGTH) { // wrap around
                 currentDigit = 0;
             }
-        } else if (isButtonPressed(3)) {
+        } else if (isButtonPressed(3)) { // selects the digit the cursor is pointing to
             isSelectingDigit = !isSelectingDigit;
         }
-    } else {
-        if (isButtonPressed(0) || isButtonPressed(3)) {
+    } else { // selecting a number for the current digit
+        if (isButtonPressed(0) || isButtonPressed(3)) { // save digit and return to moving cursor
             isSelectingDigit = !isSelectingDigit;
             return;
         }
-        int change = isButtonPressed(1) ? -1 : 1;
-        bool editingHour = currentDigit < 2;
+        int change = isButtonPressed(1) ? -1 : 1; // shoud the number go up or down
+        bool editingHour = currentDigit < 2; // first 2 digits is hour, last 2 is minutes
         bool editingTens = currentDigit % 2 == 0;
 
         if (editingHour) {

@@ -4,6 +4,9 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
+/**
+ * Used to do network related things with sockets
+ */
 class Network {
 public:
     static bool connectToWifi(NetworkInterface* network);
