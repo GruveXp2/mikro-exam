@@ -51,7 +51,7 @@ const char* SSL_CA_PEM1 =
 "Ipwgu2L/WJclvd6g+ZA/iWkLSMcpnFb+uX6QBqvD6+RNxul1FaB5iHY=\n"
 "-----END CERTIFICATE-----\n";
 
-// Function to draw the weather and the 
+// Function to draw the weather_symbol and the air_temp
 void WeatherView::draw(DFRobot_RGBLCD1602* lcd) {
     weather_mutex.lock();
     lcd->setCursor(0, 0);
@@ -95,9 +95,10 @@ void WeatherView::update() {
     nsapi_size_or_error_t sentBytes = 0;
     const char* sendPtr = httpRequest.c_str();
 
+    // Loops as long there are more data 
     while (bytesToSend) {
         sentBytes = socket->send(sendPtr, bytesToSend);
-        if (sentBytes < 0) {
+        if (sentBytes < 0) { // Cheks if the sent bytes are negative, if so breaks the loop
             break;
         } else {
             printf("%d bytes\n", sentBytes);
@@ -110,49 +111,52 @@ void WeatherView::update() {
       while (1);
     }
 
-    static char buffer[BUFFER_SIZE];
-    memset(buffer, 0, BUFFER_SIZE);
-    std::string Shorten_Json;
-    bool Start_string_found= false;
-    size_t Start_of_the_array = std::string::npos;
-    size_t End_of_the_array = std::string::npos;
+    
+    static char buffer[BUFFER_SIZE];  // Define the buffer with a set size 
+    memset(buffer, 0, BUFFER_SIZE);   // Clears the buffer 
+    std::string shorten_json;
+    bool found_array_start= false;
+    // Index where the JSON array starts and ends
+    size_t json_start = std::string::npos;
+    size_t json_end = std::string::npos;
 
     while (true) {
-        int r = socket->recv(buffer, BUFFER_SIZE);
-        if (r <= 0) break;
+        // Receving data 
+        int received_bytes = socket->recv(buffer, BUFFER_SIZE);
+        if (received_bytes <= 0) break;  // Brekas if the byte's sent is negative or 0 
 
-        Shorten_Json.append(buffer, r);
+        shorten_json.append(buffer, received_bytes); 
 
-        if (!Start_string_found) {
-            size_t pos = Shorten_Json.find("\"timeseries\":[{");
-            if (pos != std::string::npos) {
-                Start_of_the_array = Shorten_Json.find("[{", pos);
-                if (Start_of_the_array != std::string::npos) {
-                    Start_string_found= true;
-                    Shorten_Json = Shorten_Json.substr(Start_of_the_array);
+        if (!found_array_start) {
+            size_t firstTimeseries= shorten_json.find("\"timeseries\":[{"); // Look for the start of the timeseries
+            if (firstTimeseries!= std::string::npos) {
+                json_start = shorten_json.find("[{", firstTimeseries); // Find where the actual array begins
+                if (json_start != std::string::npos) {
+                    found_array_start= true;
+                    shorten_json = shorten_json.substr(json_start); // Keeps only the portion of the array we want
                 }
             } else {
-                // Not found yet, keep reading
-                if (Shorten_Json.size() > 512) {
-                    Shorten_Json = Shorten_Json.substr(Shorten_Json.size() - 256);
+                // If timeseries are not found yet and the buffer is too big, keep only the last 256
+                if (shorten_json.size() > 512) {
+                    shorten_json = shorten_json.substr(shorten_json.size() - 256);
                 }
                 continue;
             }
         }
 
-        // If start found, look for end "}}}}"
-        if (Start_string_found) {
-            End_of_the_array = Shorten_Json.find("}}}}");
-            if (End_of_the_array != std::string::npos) {
-                End_of_the_array += 4; // move past "}}}}"
+        // If start found, look for end }}}}
+        if (found_array_start) {
+            json_end = shorten_json.find("}}}}");
+            if (json_end != std::string::npos) {
+                json_end += 4; // move past }}}}
 
                 // Extract the JSON snippet of timeseries first object
-                std::string timeseriesChunk = Shorten_Json.substr(0, End_of_the_array);
+                std::string timeseriesChunk = shorten_json.substr(0, json_end);
 
                 // Add closing bracket for timeseries array
                 timeseriesChunk += "]";
 
-                // Wrap in root object
+                // Wraps the timeseries in closing paranthesis to make a complete JSON - object
                 std::string minimalJson = "{\"timeseries\":" + timeseriesChunk + "}";
 
                 // Parse JSON now
@@ -162,9 +166,11 @@ void WeatherView::update() {
                     return;
                 }
 
+                // Extract the infromastion from the JSON, like air_temp and humidity 
                 if (jsonData.contains("timeseries") && !jsonData["timeseries"].empty()) {
-                    auto& firstEntry = jsonData["timeseries"][0];
+                    auto& firstEntry = jsonData["timeseries"][0]; // Takes the first entry of the timeseries
 
+                    // Get air_temperature 
                     if (firstEntry.contains("data") &&
                         firstEntry["data"].contains("instant") &&
                         firstEntry["data"]["instant"].contains("details") &&
@@ -176,6 +182,7 @@ void WeatherView::update() {
                         printf("Missing expected air_temperature key\n");
                     }  
 
+                    // Get weather_symbol
                     if (firstEntry["data"].contains("next_1_hours") &&
                         firstEntry["data"]["next_1_hours"].contains("summary") &&
                         firstEntry["data"]["next_1_hours"]["summary"].contains("symbol_code")) {
@@ -187,17 +194,19 @@ void WeatherView::update() {
                     }
 
                 } else {
-                    printf("Missing expected air_temperature key\n");
+                    printf("Missing timeseries array in JSON\n");
                 }
-
+                
+                // Clear of stored JSAON data to free up memory
                 jsonData.clear();
-                Shorten_Json.clear();
+                shorten_json.clear();
                 timeseriesChunk.clear();
                 minimalJson.clear();
                 break;  
             }
         }
     }
+    // Close network socket and free up its memory, avoiding memory leak
     socket->close();
     delete socket;
     
@@ -206,7 +215,7 @@ void WeatherView::update() {
     Network::networkAccess.release();
 }
 
-
+// Button check to move between views
 void WeatherView::checkButtons() {
     if (isButtonPressed(1)) {
         menu->prevView();

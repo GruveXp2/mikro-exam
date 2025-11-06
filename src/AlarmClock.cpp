@@ -19,7 +19,7 @@ void AlarmClock::buzzer_task(){
         while (!(flags.get() & BUZZER_STOP)) {
             buzzer.write(beep ? 0.5f : 0.0f);
             beep = !beep;
-            flags.wait_any_for(BUZZER_STOP, 250ms, false); // hvis noen skrur av alarmen så skippes venting og skrur av med en gang
+            flags.wait_any_for(BUZZER_STOP, 250ms, false); // If the alarm is stopped, skip waiting and turn off immediately
         }   
         buzzer.write(0);
         flags.clear(BUZZER_ON | BUZZER_STOP);

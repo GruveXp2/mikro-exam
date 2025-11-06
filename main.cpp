@@ -78,7 +78,7 @@ void handleButtonPress(int buttonIndex) {
 }
 
 int main() {
-    osThreadSetPriority(osThreadGetId(), osPriorityRealtime);
+    osThreadSetPriority(osThreadGetId(), osPriorityRealtime);  // Setting the main_thread priority 
     debounceTimer.start();
     serial_port.set_baud(115200);
     lcd.init();
@@ -127,8 +127,7 @@ int main() {
         printf("Sendeing................... ");fflush(stdout);
         sentBytes = socket->send(httpRequest.c_str() + sentBytes, bytesToSend);
 
-        if (sentBytes < 0) {
-            // Negative return values from send() are errors
+        if (sentBytes < 0) { // Cheks if the sent bytes are negative, if so breaks the loop
             break;
         } else {
             printf("%d bytes\n", sentBytes);
@@ -147,12 +146,13 @@ int main() {
     lcd.printf("Connect ######--");
 
 
-    char static buffer[BUFFER_SIZE];
-    memset(buffer, 0, BUFFER_SIZE);
+    char static buffer[BUFFER_SIZE];  // Define the buffer with a set size 
+    memset(buffer, 0, BUFFER_SIZE);   // Clears the buffer 
     int remainingBytes = BUFFER_SIZE;
     int receivedBytes = 0;
 
     printf("Starting to receive\n");
+    // Receving data 
     while (remainingBytes > 0) {
         nsapi_size_or_error_t result = socket->recv(buffer + receivedBytes, remainingBytes);
         if (result == 0) {
@@ -167,6 +167,7 @@ int main() {
     }
     buffer[receivedBytes] = '\0';  
 
+    // Convert recevied buffer to string, and locate the end of the HTTP header 
     std::string data(buffer, receivedBytes);
     size_t index = data.find("\r\n\r\n");
     if (index == std::string::npos) {
@@ -179,29 +180,33 @@ int main() {
 
     
     string bufferStr = buffer;
-    size_t index1 = bufferStr.find('{');
-    size_t index2 = bufferStr.find("}}}");
-    buffer[index2 + 3] = '\0';
-    char* json_str = buffer + index1;
+    // Define the start and the end of the JSON object 
+    size_t jsonStart = bufferStr.find('{');
+    size_t jsonEnd = bufferStr.find("}}}");
+    buffer[jsonEnd + 3] = '\0';  
+    char* json_str = buffer + jsonStart;
 
+    // Parse the JSON object 
     json jsonData = json::parse(json_str, nullptr, false);  
 
     if (jsonData.is_discarded()) {
         printf("JSON parse error\n");
         return 1;
     }
-
+    // Free up memory after they are used
     data.clear();
     bufferStr.clear();
     lcd.setCursor(0, 0);
     lcd.printf("Connect ########");
 
-   if (jsonData.contains("time_zone") && jsonData["time_zone"].is_object() &&
+    // Extract informastion from time_zone object and location object
+    if (jsonData.contains("time_zone") && jsonData["time_zone"].is_object() &&
         jsonData.contains("location") && jsonData["location"].is_object()) {
             const auto& timezone = jsonData["time_zone"];
             const auto& location = jsonData["location"];
             lcd.clear();
 
+            // Get date_time_unix and displayes it 
             if (timezone.contains("date_time_unix") && timezone["date_time_unix"].is_number_float()) {
                 unix_time = timezone["date_time_unix"];
                 lcd.setCursor(0, 0);
@@ -212,12 +217,12 @@ int main() {
                 lcd.clear();
                 } 
         
-
+            // Get latitude and longitude and dispalyes it 
             if (location.contains("latitude") && location["latitude"].is_string() &&
                 location.contains("longitude") && location["longitude"].is_string()){
                     latitude = location["latitude"];
                     longitude = location["longitude"];
-                    // making sure hte latitude/longitude strings are exactly 8c long as required by SetLocationView
+                    // making sure the latitude/longitude strings are exactly 8c long as required by SetLocationView
                     // they will either be 7 or 8 digits based on if the degrees are 1 or 2 digits before the comma
                     if (latitude.size() < 8) {
                         latitude = '0' + latitude;
@@ -234,7 +239,7 @@ int main() {
                 }
             
 
-                
+            // Get city name and displayes it 
             if (location.contains("city") && location["city"].is_string()){
                 std::string city = location["city"];
                 lcd.setCursor(0, 0);
@@ -247,20 +252,19 @@ int main() {
             int utc_offset_sec = 0;
             int dst_saving_sec = 0;
             if (timezone.contains("offset") && timezone["offset"].is_number_integer()) {
-                utc_offset_sec = timezone["offset"].get<int>() * 3600;;
+                utc_offset_sec = timezone["offset"].get<int>() * 3600;;  //Convert the timezone to hours
                 } 
                 
 
             if (timezone.contains("dst_savings") && timezone["dst_savings"].is_number_integer()) {
-                dst_saving_sec = timezone["dst_savings"].get<int>() * 3600;;
+                dst_saving_sec = timezone["dst_savings"].get<int>() * 3600;;  // Convert the timezone to hours
                 } 
                 
             printf("%i\n", dst_saving_sec);
             printf("%i\n",utc_offset_sec);
-            time_t local_time = unix_time + utc_offset_sec + dst_saving_sec;
+            time_t local_time = unix_time + utc_offset_sec + dst_saving_sec;  
 
-            set_time(local_time);
-
+            set_time(local_time);    // Set the RTC on the mikrocontroller
 
 
     } else {
@@ -268,6 +272,7 @@ int main() {
         return 1;
         }
 
+    // Close network socket and free up its memory, avoiding memory leak
     jsonData.clear();
     socket->close();
     delete socket;

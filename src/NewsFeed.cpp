@@ -29,6 +29,7 @@ const char* SSL_CA_PEM2 =
 "5uk4mCdW\n"
 "-----END CERTIFICATE-----\n";
 
+// Function to draw the news feed
 void NewsFeed::draw(DFRobot_RGBLCD1602* lcd) {
     newsFeed_mutex.lock();
     lcd->setCursor(0, 0);
@@ -46,10 +47,11 @@ void NewsFeed::draw(DFRobot_RGBLCD1602* lcd) {
         lcd->setCursor(0, 1);
         lcd->printf("%s", window.c_str());
 
-        scrollingIndex++;
-        if (scrollingIndex + lcdWidth > text.length()) {
-            scrollingIndex = 0;
-            headlineIndex = (headlineIndex + 1) % headlines.size(); // next headline
+        scrollingIndex++;  // Moves the scrolling index to the next
+
+        if (scrollingIndex + lcdWidth > text.length()) { // Cheks if we are at the end of the text 
+            scrollingIndex = 0;  // Start the scrolling from the beginning
+            headlineIndex = (headlineIndex + 1) % headlines.size(); // Move to the next headline
         }
     }
     newsFeed_mutex.unlock();
@@ -88,12 +90,10 @@ void NewsFeed::update() {
 
     printf("\nHTTP GET: %s%s\n", newsHost.c_str(), newsPath.c_str());
 
+    // Loops as long there are more data 
     while (bytesToSend) {
-        printf("Sending................... ");fflush(stdout);
         sentBytes = socket->send(httpRequest.c_str() + sentBytes, bytesToSend);
-
-        if (sentBytes < 0) {
-            // Negative return values from send() are errors
+        if (sentBytes < 0) { // Cheks if the sent bytes are negative, if so breaks the loop
             break;
         } else {
             printf("%d bytes\n", sentBytes);
@@ -107,41 +107,47 @@ void NewsFeed::update() {
       while (1);
     }
     
-    static char buffer[BUFFER_SIZE];
-    memset(buffer, 0, BUFFER_SIZE);
+    static char buffer[BUFFER_SIZE]; // Define the buffer with a set size
+    memset(buffer, 0, BUFFER_SIZE);  // Clears the buffer 
     std::string xmlChunk;
-    int titleCount = 0;
+    int titleCount = 0;              // Count on how many headlines
     bool insideItem = false;
+    size_t itemStart;
+    size_t itemEnd;         
 
-    headlines.clear();
+    headlines.clear();               // Clear headline vector 
 
     while (true) {
-        int r = socket->recv(buffer, BUFFER_SIZE);
-        if (r <= 0 || titleCount >= 3) break;
+        // Receving data 
+        int received_bytes = socket->recv(buffer, BUFFER_SIZE);
+        if (received_bytes <= 0 || titleCount >= 3) break;  // Breaks if the byte's sent is negative or 0 or we have 3 headlines
 
-        xmlChunk.append(buffer, r);
+        xmlChunk.append(buffer, received_bytes);
 
-        // Trim early if no <item> yet
+        // If item are not found yet and the buffer is too big, keep only the last 256
         if (!insideItem && xmlChunk.size() > 512)
             xmlChunk = xmlChunk.substr(xmlChunk.size() - 256);
 
+        // Looks start of the <item>
         size_t firstItem = xmlChunk.find("<item>");
         if (firstItem != std::string::npos) {
-            insideItem = true;
-            xmlChunk.erase(0, firstItem);
+            insideItem = true;                  
+            xmlChunk.erase(0, firstItem);  // Remove everything before <item>
         }
 
-        // Parse items
-        size_t itemStart, itemEnd;
+        // Loops through all complete <item> blocks 
         while ((itemStart = xmlChunk.find("<item>")) != std::string::npos &&
             (itemEnd = xmlChunk.find("</item>", itemStart)) != std::string::npos) {
 
             std::string itemBlock = xmlChunk.substr(itemStart, itemEnd + 7 - itemStart);
-            size_t t1 = itemBlock.find("<title>");
-            size_t t2 = itemBlock.find("</title>");
-            if (t1 != std::string::npos && t2 != std::string::npos) {
-                std::string title = itemBlock.substr(t1 + 7, t2 - (t1 + 7));
 
+            // Index of the start and the end of the item
+            size_t titleStart= itemBlock.find("<title>");
+            size_t titleEnd= itemBlock.find("</title>");
+            if (titleStart!= std::string::npos && titleEnd!= std::string::npos) {
+                std::string title = itemBlock.substr(titleStart+ 7, titleEnd- (titleStart+ 7));  // Extracting the headline
+
+                // Remove CDATA off the xmlChunk
                 const std::string cdataStart = "<![CDATA[";
                 const std::string cdataEnd = "]]>";
                 if (title.find(cdataStart) != std::string::npos)
@@ -159,9 +165,9 @@ void NewsFeed::update() {
             if (titleCount >= 3) break;
         }
     }
-    // Closes and deletes the socket, to free up som space on the heap 
+    // Close network socket and free up its memory, avoiding memory leak
     socket->close();   
-    delete socket;
+    delete socket;  
 
     printf("======= Success =======\n");
     Network::networkAccess.release();
