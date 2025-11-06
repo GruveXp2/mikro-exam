@@ -3,6 +3,8 @@
 #include <cstring>
 #include <string>
 
+Semaphore Network::networkAccess(1, 1);
+
 NetworkInterface* Network::getNetworkInterFace() {
     printf("Getting network interface.. ");fflush(stdout);
     NetworkInterface *network = NetworkInterface::get_default_instance();
@@ -78,18 +80,14 @@ bool Network::connectToHost(TLSSocket *socket, NetworkInterface* network, const 
     }
     printf("\rConnecting to %s%sSuccess (%d)     \n", hostName, dotStr.c_str(), tries);
 
-
-    printf("Success\n");
-
     address.set_port(443);
     result = socket->connect(address);
     if (result != NSAPI_ERROR_OK) {
-        printf("failed (%d)\n", result);
+        printf("Socket connect failed (%d)\n", result);
         socket->close();
         delete socket;
         return false;
     }
-    printf("Success\n");
     return true;
 }
 

@@ -1,9 +1,10 @@
 #include "Menu.h"
 #include "NewsFeed.h"
 #include "Network.h"
+#include <cstdio>
 
 NewsFeed::NewsFeed(Menu* menu, int& buttonFlags, NetworkInterface* network)
-    : View(menu, buttonFlags), network(network), update_thread(osPriorityLow) {
+    : View(menu, buttonFlags), network(network), update_thread(osPriorityNormal) {
         update_thread.start(callback(this, &NewsFeed::thread_task));
     }
 
@@ -37,7 +38,7 @@ void NewsFeed::draw(DFRobot_RGBLCD1602* lcd) {
         std::string text = headlines[headlineIndex];
 
         // Adds spaces between the headlines
-        text += "                ";  
+        text = "                " + text + "                ";
 
         std::string window = text.substr(scrollingIndex, lcdWidth);
 
@@ -54,7 +55,6 @@ void NewsFeed::draw(DFRobot_RGBLCD1602* lcd) {
 }
 
 void NewsFeed::thread_task(){
-    ThisThread::sleep_for(5s);
     while(1){
         printf("Fetching news feed api\n");
         fflush(stdout);
@@ -66,6 +66,9 @@ void NewsFeed::thread_task(){
 }
 
 void NewsFeed::update() {
+    Network::networkAccess.acquire(); // only 1 thread can use network at the same time to save memory
+
+    printf("========== Fetching News ==========\n");
     TLSSocket* socket = new TLSSocket();
     std::string newsHost = "feeds.bbci.co.uk";
     std::string newsPath = "/news/world/rss.xml";
@@ -155,6 +158,9 @@ void NewsFeed::update() {
     }
     socket->close();
     delete socket;
+
+    printf("======= Success =======\n");
+    Network::networkAccess.release();
 }
 
 

@@ -6,7 +6,7 @@
 #include <ctime>
 
 WeatherView::WeatherView(Menu* menu, int& buttonFlags, NetworkInterface* network, const std::string& longitude, const std::string& latitude)
-    : View(menu, buttonFlags), network(network), longitude(longitude), latitude(latitude), update_thread(osPriorityLow) {
+    : View(menu, buttonFlags), network(network), longitude(longitude), latitude(latitude), update_thread(osPriorityNormal) {
         update_thread.start(callback(this, &WeatherView::thread_task));
     }
 
@@ -75,6 +75,9 @@ void WeatherView::thread_task(){
 
 
 void WeatherView::update() {
+    Network::networkAccess.acquire(); // only 1 thread can use network at the same time to save memory
+
+    printf("========== Fetching Weather ==========\n");
     TLSSocket* socket = new TLSSocket();
     std::string weatherHost = "api.met.no";
     std::string weatherPath = "/weatherapi/locationforecast/2.0/compact?lat=" + longitude + "&lon=" + latitude;
@@ -151,8 +154,6 @@ void WeatherView::update() {
                 // Wrap in root object
                 std::string minimalJson = "{\"timeseries\":" + timeseriesChunk + "}";
 
-                printf("Extracted minimal JSON:\n%s\n", minimalJson.c_str());
-
                 // Parse JSON now
                 json jsonData = json::parse(minimalJson, nullptr, false);
                 if (jsonData.is_discarded()) {
@@ -198,6 +199,10 @@ void WeatherView::update() {
     }
     socket->close();
     delete socket;
+    
+    
+    printf("======= Success =======\n");
+    Network::networkAccess.release();
 }
 
 

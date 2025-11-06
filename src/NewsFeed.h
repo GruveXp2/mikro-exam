@@ -18,7 +18,7 @@ public:
     void draw(DFRobot_RGBLCD1602* lcd) override;
 
 private:
-    size_t scrollingIndex = 5;
+    size_t scrollingIndex = 0;
     size_t headlineIndex = 0;
     static const int lcdWidth = 16;
 
