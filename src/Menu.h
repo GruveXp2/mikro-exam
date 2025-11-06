@@ -38,6 +38,9 @@ protected:
     AlarmClock alarmClock;
     std::string& longitude;
     std::string& latitude;
+
+    EventFlags flags;
+    static const uint32_t FLAG_UPDATE_WEATHER = 0x1;
 };
 
 #endif //MENU_H

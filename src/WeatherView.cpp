@@ -68,7 +68,7 @@ void WeatherView::thread_task(){
         printf("Fetching weather api\n");
         fflush(stdout);
         update();
-        flags.wait_any(FLAG_UPDATE_WEATHER, 15min); // next update in 15min unless the user wants to update now (by changing longitude and latidude)
+        flags.wait_any_for(FLAG_UPDATE_WEATHER, 15min); // next update in 15min unless the user wants to update now (by changing longitude and latidude)
     }
 }
 

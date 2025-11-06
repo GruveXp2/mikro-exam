@@ -36,8 +36,6 @@ private:
 
     void update();
     void thread_task();
-    EventFlags flags;
-    static const uint32_t FLAG_UPDATE_WEATHER = 0x1;
 };
 
 #endif //WEATHERVIEW_H

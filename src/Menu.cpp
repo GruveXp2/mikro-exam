@@ -64,5 +64,11 @@ void Menu::checkButtons() {
 }
 
 void Menu::notifyLocationUpdated() {
-    views.at(ViewType::WEATHER)->requestUpdate();
+    // Get pointer to view and cast to WeatherView*
+    auto* weatherView = dynamic_cast<WeatherView*>(views.at(static_cast<int>(ViewType::WEATHER)).get());
+    
+    if (weatherView) {
+        weatherView->requestUpdate();
+    }
 }
+
